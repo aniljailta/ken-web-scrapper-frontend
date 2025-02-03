@@ -1,101 +1,133 @@
-import Image from "next/image";
+"use client";
+
+// import { useRouter } from "next/navigation";
+import { useState } from "react";
 
 export default function Home() {
-  return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-      <main className="flex flex-col gap-8 row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="list-inside list-decimal text-sm text-center sm:text-left font-[family-name:var(--font-geist-mono)]">
-          <li className="mb-2">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] px-1 py-0.5 rounded font-semibold">
-              src/app/page.tsx
-            </code>
-            .
-          </li>
-          <li>Save and see your changes instantly.</li>
-        </ol>
+  // const router = useRouter();
+  const [productQuestion, setProductQuestion] = useState("");
+  const [messages, setMessages] = useState<{ type: string; content: string }[]>(
+    []
+  );
+  const [isTyping, setIsTyping] = useState(false);
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:min-w-44"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    if (!productQuestion) {
+      return;
+    }
+    try {
+      // Add the user's question to the messages list
+      setMessages((prevMessages) => [
+        ...prevMessages,
+        { type: "question", content: productQuestion },
+      ]);
+
+      setIsTyping(true); // Show "Typing..." while fetching
+
+      const passwordHex = (process.env.NEXT_PUBLIC_QUERY_PASSWORD as string)
+        .split("")
+        .map((char) => char.charCodeAt(0).toString(16))
+        .join("");
+
+      const res = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}products/product-query`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            question: productQuestion,
+            password: passwordHex,
+          }),
+        }
+      );
+
+      const responseData = await res.json();
+
+      setIsTyping(true);
+      simulateTypingEffect(responseData.data);
+
+      // if (responseData.isAIResponse) {
+      // } else {
+      //   console.log({ data: responseData.data });
+      // }
+    } catch (err) {
+      console.log({ err });
+    } finally {
+      // Clear the input field after submission
+      setProductQuestion("");
+      setIsTyping(false);
+    }
+  };
+
+  // Function to simulate typing effect
+  const simulateTypingEffect = (response: string) => {
+    let index = 0;
+    setMessages((prevMessages) => [
+      ...prevMessages,
+      { type: "response", content: "" }, // Ensure response starts as empty
+    ]);
+
+    const typingInterval = setInterval(() => {
+      setMessages((prevMessages) => {
+        return prevMessages.map((msg, i) =>
+          i === prevMessages.length - 1 && msg.type === "response"
+            ? { ...msg, content: msg.content + response[index - 1] } // Append character
+            : msg
+        );
+      });
+
+      index++;
+
+      if (index >= response.length) {
+        clearInterval(typingInterval);
+      }
+    }, 20);
+  };
+
+  return (
+    <div>
+      <div className="flex min-h-screen flex-col items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
+        <div className="w-full max-w-lg space-y-8">
+          <div className="space-y-9">
+            <h1 className="text-center text-3xl text-[32px] font-medium tracking-tight text-gray-900">
+              What PID do you have?
+            </h1>
+            <div className="space-y-4 w-full max-w-2xl mx-auto ">
+              <form onSubmit={handleSubmit}>
+                <input
+                  placeholder="Enter Cisco PID or Product"
+                  type="name"
+                  required
+                  value={productQuestion}
+                  onChange={(e) => setProductQuestion(e.target.value)}
+                  className="mt-1 block w-full h-[45px] bg-[#FFE45A]/10 rounded-[10px] border border-[#A2A2A2] px-4 py-3  placeholder:text-black/70"
+                />
+              </form>
+            </div>
+
+            {/* Display the conversation */}
+            <div className="space-y-4 max-w-3xl">
+              {messages.map((message, index) => (
+                <div
+                  key={index}
+                  className={`p-4 rounded-lg break-words text-base font-light text-black/75`}
+                >
+                  {message.content}
+                </div>
+              ))}
+
+              {/* Show typing indicator when the bot is typing */}
+              {isTyping && (
+                <div className="p-4 bg-gray-100 text-gray-900 mr-auto rounded-lg break-words">
+                  <span className="animate-pulse">Retrieving PID...</span>
+                </div>
+              )}
+            </div>
+          </div>
         </div>
-      </main>
-      <footer className="row-start-3 flex gap-6 flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
+      </div>
     </div>
   );
 }
