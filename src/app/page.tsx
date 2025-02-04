@@ -1,9 +1,11 @@
 "use client";
 
-// import { useRouter } from "next/navigation";
+import { useSession } from "next-auth/react";
 import { useState } from "react";
 
 export default function Home() {
+  const { data } = useSession();
+
   // const router = useRouter();
   const [productQuestion, setProductQuestion] = useState("");
   const [messages, setMessages] = useState<{ type: string; content: string }[]>(
@@ -35,7 +37,10 @@ export default function Home() {
         `${process.env.NEXT_PUBLIC_API_URL}products/product-query`,
         {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${data ? data.user.access_token : ""}`,
+          },
           body: JSON.stringify({
             question: productQuestion,
             password: passwordHex,
@@ -46,14 +51,30 @@ export default function Home() {
       const responseData = await res.json();
 
       setIsTyping(true);
-      simulateTypingEffect(responseData.data);
+      if (responseData.data) {
+        simulateTypingEffect(responseData.data);
+      } else if (responseData.code === "FORBIDDEN") {
+        setMessages((prevMessages) => [
+          ...prevMessages,
+          { type: "response", content: responseData.message || "" }, // Ensure response starts as empty
+        ]);
+      } else {
+        setMessages((prevMessages) => [
+          ...prevMessages,
+          { type: "response", content: "" }, // Ensure response starts as empty
+        ]);
+      }
 
       // if (responseData.isAIResponse) {
       // } else {
       //   console.log({ data: responseData.data });
       // }
     } catch (err) {
-      console.log({ err });
+      console.error({ err });
+      setMessages((prevMessages) => [
+        ...prevMessages,
+        { type: "response", content: "" }, // Ensure response starts as empty
+      ]);
     } finally {
       // Clear the input field after submission
       setProductQuestion("");

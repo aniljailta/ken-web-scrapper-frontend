@@ -18,14 +18,13 @@ export default async function RootLayout({
 }) {
   const session = await getSession();
 
-  console.log({ session });
   return (
     <html lang="en" suppressHydrationWarning className={robotoMono.className}>
       <body>
         <AuthProvider>
           <header className="bg-white">
             <div className="max-w-7xl mx-auto px-4 py-6">
-              <div className="flex justify-between gap-2">
+              <div className="hidden md:flex justify-between items-center gap-2">
                 <p className="text-base font-normal text-black max-w-24">
                   Great Migration
                 </p>
@@ -47,6 +46,23 @@ export default async function RootLayout({
                     </Link>
                   </div>
                 )}
+              </div>
+
+              <div className="flex md:hidden justify-between gap-2 items-center">
+                {!session?.user && (
+                  <Link href={"/signup"} passHref>
+                    <div className="min-w-24 px-4 py-3 bg-black text-white rounded-[10px]">
+                      Sign Up
+                    </div>
+                  </Link>
+                )}
+
+                <p className="text-base font-normal text-black max-w-24">G M</p>
+                <Link href={"/login"} passHref>
+                  <div className="min-w-24 px-4 py-3 bg-white text-black rounded-[10px]">
+                    Log in
+                  </div>
+                </Link>
               </div>
             </div>
           </header>
