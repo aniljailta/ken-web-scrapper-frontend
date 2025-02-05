@@ -10,58 +10,100 @@ type AuthFormProps = {
 
 export default function AuthForm({ mode }: AuthFormProps) {
   const router = useRouter();
-  const [email, setEmail] = useState("");
-  const [name, setName] = useState("");
-  const [password, setPassword] = useState("");
-  const [error, setError] = useState("");
+  const [email, setEmail] = useState<string>("");
+  const [name, setName] = useState<string>("");
+  const [password, setPassword] = useState<string>("");
+  const [error, setError] = useState<string>("");
 
+  const validateEmail = (email: string): boolean => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(email);
+  };
+
+  const validateFields = (
+    mode: "login" | "signup",
+    fields: { email: string; password: string; name?: string }
+  ): string | null => {
+    const { email, password, name } = fields;
+
+    if (mode === "login" && (!email || !password)) {
+      return "Email and password are required.";
+    }
+
+    if (mode === "signup" && (!name || !email || !password)) {
+      return "Name, email, and password are required.";
+    }
+
+    if (!validateEmail(email)) {
+      return "Please enter a valid email address.";
+    }
+
+    return null;
+  };
+
+  // API calls
+  const signupUser = async (email: string, password: string, name: string) => {
+    const res = await fetch(
+      `${process.env.NEXT_PUBLIC_API_URL}users/register`,
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password, name, role: "user" }),
+      }
+    );
+
+    if (!res) {
+      throw new Error("Invalid credentials");
+    }
+
+    const data = await res.json();
+    if (!data) {
+      throw new Error("Invalid response from server");
+    }
+
+    return data;
+  };
+
+  // Main submit handler
   const handleSubmit = async (e: React.FormEvent) => {
+    console.log({ e });
     e.preventDefault();
     setError("");
 
-    if (mode === "login") {
-      const result = await signIn("credentials", {
-        redirect: false,
-        email,
-        password,
-      });
+    // Validate form fields
+    const validationError = validateFields(mode, { email, password, name });
+    if (validationError) {
+      setError(validationError);
+      return;
+    }
 
-      if (result?.error) {
-        setError("Invalid credentials");
+    try {
+      if (mode === "login") {
+        const result = await signIn("credentials", {
+          redirect: false,
+          email,
+          password,
+        });
+
+        if (result?.error) {
+          setError("Invalid credentials");
+        } else {
+          router.push("/");
+          router.refresh();
+        }
       } else {
-        router.push("/");
+        const data = await signupUser(email, password, name);
+
+        if (!data.user) {
+          setError(data?.message || "An error occurred");
+          throw new Error(data?.message);
+        }
+
+        router.push("/login");
         router.refresh();
       }
-    } else {
-      // Handle signup
-      try {
-        const res = await fetch(
-          `${process.env.NEXT_PUBLIC_API_URL}users/register`,
-          {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ email, password, name, role: "user" }),
-          }
-        );
-
-        if (res.ok) {
-          // Automatically sign in after successful signup
-          await signIn("credentials", {
-            redirect: false,
-            name,
-            email,
-            password,
-            role: "user",
-          });
-          router.push("/login");
-          router.refresh();
-        } else {
-          setError("Signup failed");
-        }
-      } catch (err) {
-        console.log({ err });
-        setError("An error occurred");
-      }
+    } catch (err) {
+      setError(err instanceof Error ? err?.message : "An error occurred");
     }
   };
 

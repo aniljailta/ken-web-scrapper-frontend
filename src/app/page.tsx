@@ -1,32 +1,36 @@
 "use client";
 
 import { useSession } from "next-auth/react";
+import Image from "next/image";
 import { useState } from "react";
+import { useForm } from "react-hook-form";
 
 export default function Home() {
-  const { data } = useSession();
-
+  const { data: sessionUser } = useSession();
   // const router = useRouter();
-  const [productQuestion, setProductQuestion] = useState("");
+
+  const {
+    register,
+    handleSubmit,
+    reset,
+    formState: { errors },
+  } = useForm<{ productQuestion: string }>();
+
   const [messages, setMessages] = useState<{ type: string; content: string }[]>(
     []
   );
-  const [isTyping, setIsTyping] = useState(false);
+  const [isTyping, setIsTyping] = useState<boolean>(false);
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const onSubmit = async (data: { productQuestion: string }) => {
+    if (!data.productQuestion) return;
 
-    if (!productQuestion) {
-      return;
-    }
     try {
-      // Add the user's question to the messages list
       setMessages((prevMessages) => [
         ...prevMessages,
-        { type: "question", content: productQuestion },
+        { type: "question", content: data.productQuestion },
       ]);
 
-      setIsTyping(true); // Show "Typing..." while fetching
+      setIsTyping(true);
 
       const passwordHex = (process.env.NEXT_PUBLIC_QUERY_PASSWORD as string)
         .split("")
@@ -39,66 +43,57 @@ export default function Home() {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
-            Authorization: `Bearer ${data ? data.user.access_token : ""}`,
+            Authorization: `Bearer ${
+              sessionUser ? sessionUser.user.access_token : ""
+            }`,
           },
           body: JSON.stringify({
-            question: productQuestion,
+            question: data.productQuestion,
             password: passwordHex,
           }),
         }
       );
 
       const responseData = await res.json();
+      setIsTyping(false);
+      reset(); // Reset form after submission
 
-      setIsTyping(true);
       if (responseData.data) {
         simulateTypingEffect(responseData.data);
-      } else if (responseData.code === "FORBIDDEN") {
-        setMessages((prevMessages) => [
-          ...prevMessages,
-          { type: "response", content: responseData.message || "" }, // Ensure response starts as empty
-        ]);
       } else {
         setMessages((prevMessages) => [
           ...prevMessages,
-          { type: "response", content: "" }, // Ensure response starts as empty
+          {
+            type: "response",
+            content: responseData.message || "No response received",
+          },
         ]);
       }
-
-      // if (responseData.isAIResponse) {
-      // } else {
-      //   console.log({ data: responseData.data });
-      // }
     } catch (err) {
-      console.error({ err });
+      console.error(err);
       setMessages((prevMessages) => [
         ...prevMessages,
-        { type: "response", content: "" }, // Ensure response starts as empty
+        { type: "response", content: "Something went wrong." },
       ]);
-    } finally {
-      // Clear the input field after submission
-      setProductQuestion("");
-      setIsTyping(false);
     }
   };
 
-  // Function to simulate typing effect
+  // Simulate Typing Effect
   const simulateTypingEffect = (response: string) => {
     let index = 0;
     setMessages((prevMessages) => [
       ...prevMessages,
-      { type: "response", content: "" }, // Ensure response starts as empty
+      { type: "response", content: "" },
     ]);
 
     const typingInterval = setInterval(() => {
-      setMessages((prevMessages) => {
-        return prevMessages.map((msg, i) =>
+      setMessages((prevMessages) =>
+        prevMessages.map((msg, i) =>
           i === prevMessages.length - 1 && msg.type === "response"
-            ? { ...msg, content: msg.content + response[index - 1] } // Append character
+            ? { ...msg, content: msg.content + response[index - 1] }
             : msg
-        );
-      });
-
+        )
+      );
       index++;
 
       if (index >= response.length) {
@@ -107,29 +102,58 @@ export default function Home() {
     }, 20);
   };
 
+  const InputComponent = () => {
+    return (
+      <div className="space-y-4 w-full max-w-2xl mx-auto">
+        <form onSubmit={handleSubmit(onSubmit)}>
+          <div className="relative max-w-lg mx-auto">
+            <input
+              {...register("productQuestion", {
+                required: "This field is required",
+              })}
+              placeholder="Enter Cisco PID or Product"
+              type="text"
+              className="mt-1 block w-full h-[45px] bg-[#FFE45A]/10 rounded-[10px] border border-[#A2A2A2] pl-4 py-3 pr-10 placeholder:text-black/70"
+            />
+            {errors.productQuestion && (
+              <p className="text-red-500 text-sm mt-1">
+                {errors.productQuestion.message}
+              </p>
+            )}
+
+            <div
+              className="absolute top-3 right-3.5 cursor-pointer"
+              onClick={handleSubmit(onSubmit)}
+            >
+              <Image
+                src="/images/arrow.svg"
+                alt="arrow"
+                width={20}
+                height={20}
+              />
+            </div>
+          </div>
+        </form>
+      </div>
+    );
+  };
+
   return (
-    <div>
-      <div className="flex min-h-screen flex-col items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
-        <div className="w-full max-w-lg space-y-8">
+    <div className="flex min-h-[78vh] flex-col items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
+      <div className="w-full h-full max-w-xl space-y-8">
+        {messages.length === 0 && (
           <div className="space-y-9">
             <h1 className="text-center text-3xl text-[32px] font-medium tracking-tight text-gray-900">
               What PID do you have?
             </h1>
-            <div className="space-y-4 w-full max-w-2xl mx-auto ">
-              <form onSubmit={handleSubmit}>
-                <input
-                  placeholder="Enter Cisco PID or Product"
-                  type="name"
-                  required
-                  value={productQuestion}
-                  onChange={(e) => setProductQuestion(e.target.value)}
-                  className="mt-1 block w-full h-[45px] bg-[#FFE45A]/10 rounded-[10px] border border-[#A2A2A2] px-4 py-3  placeholder:text-black/70"
-                />
-              </form>
-            </div>
 
-            {/* Display the conversation */}
-            <div className="space-y-4 max-w-3xl">
+            <InputComponent />
+          </div>
+        )}
+
+        {messages.length > 0 && (
+          <div className="flex flex-col h-full">
+            <div className="flex-1 space-y-4 max-w-3xl">
               {messages.map((message, index) => (
                 <div
                   key={index}
@@ -139,15 +163,17 @@ export default function Home() {
                 </div>
               ))}
 
-              {/* Show typing indicator when the bot is typing */}
               {isTyping && (
                 <div className="p-4 bg-gray-100 text-gray-900 mr-auto rounded-lg break-words">
                   <span className="animate-pulse">Retrieving PID...</span>
                 </div>
               )}
             </div>
+            <div className="mt-4">
+              <InputComponent />
+            </div>
           </div>
-        </div>
+        )}
       </div>
     </div>
   );
