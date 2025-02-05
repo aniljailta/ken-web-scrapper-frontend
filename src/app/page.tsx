@@ -2,12 +2,12 @@
 
 import { useSession } from "next-auth/react";
 import Image from "next/image";
+
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 
 export default function Home() {
   const { data: sessionUser } = useSession();
-  // const router = useRouter();
 
   const {
     register,
