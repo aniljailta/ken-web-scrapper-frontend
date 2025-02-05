@@ -1,5 +1,6 @@
 import { signOut, useSession } from "next-auth/react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 
 export default function HeaderLayout({
@@ -8,6 +9,7 @@ export default function HeaderLayout({
   children: React.ReactNode;
 }) {
   const { data: session } = useSession();
+  const router = useRouter();
   const [dropdownOpen, setDropdownOpen] = useState<boolean>(false);
 
   const getInitials = (name: string) => {
@@ -35,13 +37,26 @@ export default function HeaderLayout({
                   {getInitials(session.user.name)}
                 </div>
                 {dropdownOpen && (
-                  <div className="absolute right-0 mt-2 w-32 bg-white shadow-lg rounded-lg">
+                  <div className="absolute right-0 mt-2 min-w-40 bg-white shadow-lg rounded-lg">
                     <div
                       className="px-4 py-2 text-black hover:bg-gray-200 cursor-pointer"
-                      onClick={() => signOut()}
+                      onClick={() => {
+                        signOut();
+                        router.push("/");
+                      }}
                     >
                       Logout
                     </div>
+                    {session.user.role === "admin" && (
+                      <div
+                        className="px-4 py-2 text-black hover:bg-gray-200 cursor-pointer"
+                        onClick={() => {
+                          router.push("/admin");
+                        }}
+                      >
+                        Admin Dashboard
+                      </div>
+                    )}
                   </div>
                 )}
               </div>
