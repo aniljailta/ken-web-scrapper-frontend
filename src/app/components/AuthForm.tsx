@@ -66,7 +66,6 @@ export default function AuthForm({ mode }: AuthFormProps) {
 
   // Main submit handler
   const handleSubmit = async (e: React.FormEvent) => {
-    console.log({ e });
     e.preventDefault();
     setError("");
 
