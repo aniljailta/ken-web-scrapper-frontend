@@ -25,9 +25,11 @@ export default function HeaderLayout({
       <header className="bg-white">
         <div className="max-w-7xl mx-auto px-4 py-6">
           <div className="hidden md:flex justify-between items-center gap-2">
-            <p className="text-base font-normal text-black max-w-24">
-              Great Migration
-            </p>
+            <Link href={"/"} passHref>
+              <p className="text-base font-normal text-black max-w-24">
+                Great Migration
+              </p>
+            </Link>
             {session?.user ? (
               <div className="relative">
                 <div

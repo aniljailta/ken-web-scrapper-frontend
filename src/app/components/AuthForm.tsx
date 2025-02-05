@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { signIn, useSession } from "next-auth/react";
+import { signIn } from "next-auth/react";
 import { useRouter } from "next/navigation";
 
 type AuthFormProps = {
@@ -10,7 +10,6 @@ type AuthFormProps = {
 
 export default function AuthForm({ mode }: AuthFormProps) {
   const router = useRouter();
-  const { data: session } = useSession();
   const [email, setEmail] = useState<string>("");
   const [name, setName] = useState<string>("");
   const [password, setPassword] = useState<string>("");
@@ -87,11 +86,7 @@ export default function AuthForm({ mode }: AuthFormProps) {
         if (result?.error) {
           setError("Invalid credentials");
         } else {
-          if (session?.user?.role === "admin") {
-            router.push("/admin");
-          } else {
-            router.push("/");
-          }
+          router.push("/");
           router.refresh();
         }
       } else {
