@@ -95,10 +95,20 @@ export default function AuthForm({ mode }: AuthFormProps) {
         if (!data.user) {
           setError(data?.message || "An error occurred");
           throw new Error(data?.message);
-        }
+        } else {
+          const result = await signIn("credentials", {
+            redirect: false,
+            email,
+            password,
+          });
 
-        router.push("/login");
-        router.refresh();
+          if (result?.error) {
+            setError("Invalid credentials");
+          } else {
+            router.push("/");
+            router.refresh();
+          }
+        }
       }
     } catch (err) {
       setError(err instanceof Error ? err?.message : "An error occurred");

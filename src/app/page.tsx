@@ -16,10 +16,12 @@ export default function Home() {
     formState: { errors },
   } = useForm<{ productQuestion: string }>();
 
-  const [messages, setMessages] = useState<{ type: string; content: string }[]>(
+  const [messages, setMessages] = useState<{ role: string; content: string }[]>(
     []
   );
   const [isTyping, setIsTyping] = useState<boolean>(false);
+
+  const [conversationId, setConversationId] = useState<string>("");
 
   const onSubmit = async (data: { productQuestion: string }) => {
     if (!data.productQuestion) return;
@@ -27,18 +29,13 @@ export default function Home() {
     try {
       setMessages((prevMessages) => [
         ...prevMessages,
-        { type: "question", content: data.productQuestion },
+        { role: "user", content: data.productQuestion },
       ]);
 
       setIsTyping(true);
 
-      const passwordHex = (process.env.NEXT_PUBLIC_QUERY_PASSWORD as string)
-        .split("")
-        .map((char) => char.charCodeAt(0).toString(16))
-        .join("");
-
       const res = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}products/product-query`,
+        `${process.env.NEXT_PUBLIC_API_URL}conversation/chat`,
         {
           method: "POST",
           headers: {
@@ -49,7 +46,7 @@ export default function Home() {
           },
           body: JSON.stringify({
             question: data.productQuestion,
-            password: passwordHex,
+            conversationId,
           }),
         }
       );
@@ -60,11 +57,12 @@ export default function Home() {
 
       if (responseData.data) {
         simulateTypingEffect(responseData.data);
+        setConversationId(responseData?.conversationId);
       } else {
         setMessages((prevMessages) => [
           ...prevMessages,
           {
-            type: "response",
+            role: "assistant",
             content: responseData.message || "No response received",
           },
         ]);
@@ -73,7 +71,7 @@ export default function Home() {
       console.error(err);
       setMessages((prevMessages) => [
         ...prevMessages,
-        { type: "response", content: "Something went wrong." },
+        { role: "assistant", content: "Something went wrong." },
       ]);
     }
   };
@@ -83,13 +81,13 @@ export default function Home() {
     let index = 0;
     setMessages((prevMessages) => [
       ...prevMessages,
-      { type: "response", content: "" },
+      { role: "assistant", content: "" },
     ]);
 
     const typingInterval = setInterval(() => {
       setMessages((prevMessages) =>
         prevMessages.map((msg, i) =>
-          i === prevMessages.length - 1 && msg.type === "response"
+          i === prevMessages.length - 1 && msg.role === "assistant"
             ? { ...msg, content: msg.content + response[index - 1] }
             : msg
         )
