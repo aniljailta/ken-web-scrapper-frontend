@@ -94,7 +94,7 @@ function AdminPage() {
               id="content"
               value={content}
               readOnly
-              className="w-full h-48 p-4 border rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              className="w-full h-56 p-4 border rounded-md focus:ring-2 focus:ring-black focus:border-black"
             />
           </div>
         </div>

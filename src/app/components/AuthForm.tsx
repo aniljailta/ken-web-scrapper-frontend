@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { signIn, useSession } from "next-auth/react";
+import { signIn } from "next-auth/react";
 import { useRouter } from "next/navigation";
 
 type AuthFormProps = {
@@ -10,7 +10,6 @@ type AuthFormProps = {
 
 export default function AuthForm({ mode }: AuthFormProps) {
   const router = useRouter();
-  const { data: session } = useSession();
   const [email, setEmail] = useState<string>("");
   const [name, setName] = useState<string>("");
   const [password, setPassword] = useState<string>("");
@@ -87,11 +86,7 @@ export default function AuthForm({ mode }: AuthFormProps) {
         if (result?.error) {
           setError("Invalid credentials");
         } else {
-          if (session?.user?.role === "admin") {
-            router.push("/admin");
-          } else {
-            router.push("/");
-          }
+          router.push("/");
           router.refresh();
         }
       } else {
@@ -100,10 +95,20 @@ export default function AuthForm({ mode }: AuthFormProps) {
         if (!data.user) {
           setError(data?.message || "An error occurred");
           throw new Error(data?.message);
-        }
+        } else {
+          const result = await signIn("credentials", {
+            redirect: false,
+            email,
+            password,
+          });
 
-        router.push("/login");
-        router.refresh();
+          if (result?.error) {
+            setError("Invalid credentials");
+          } else {
+            router.push("/");
+            router.refresh();
+          }
+        }
       }
     } catch (err) {
       setError(err instanceof Error ? err?.message : "An error occurred");
@@ -123,7 +128,7 @@ export default function AuthForm({ mode }: AuthFormProps) {
             required
             value={name}
             onChange={(e) => setName(e.target.value)}
-            className="mt-1 block w-[360px] h-[45px] rounded-[10px] border border-[#A2A2A2] px-4 py-3 "
+            className="mt-1 block w-full max-w-[360px] h-[45px] rounded-[10px] border border-[#A2A2A2] px-4 py-3 "
           />
         </div>
       )}
@@ -134,7 +139,7 @@ export default function AuthForm({ mode }: AuthFormProps) {
           required
           value={email}
           onChange={(e) => setEmail(e.target.value)}
-          className="mt-1 block w-[360px] h-[45px] rounded-[10px] border border-[#A2A2A2] px-4 py-3"
+          className="mt-1 block w-full max-w-[360px] h-[45px] rounded-[10px] border border-[#A2A2A2] px-4 py-3"
         />
       </div>
       <div>
@@ -144,13 +149,13 @@ export default function AuthForm({ mode }: AuthFormProps) {
           required
           value={password}
           onChange={(e) => setPassword(e.target.value)}
-          className="mt-1 block w-[360px] h-[45px] rounded-[10px] border border-[#A2A2A2] px-4 py-3"
+          className="mt-1 block w-full max-w-[360px] h-[45px] rounded-[10px] border border-[#A2A2A2] px-4 py-3"
         />
       </div>
       {error && <p className="text-red-500 text-sm">{error}</p>}
       <button
         type="submit"
-        className="w-[360px] h-[45px] bg-[#BFBFBF] text-white px-4 py-3 rounded-[10px] hover:bg-black cursor-pointer"
+        className="w-full max-w-[360px] h-[45px] bg-[#BFBFBF] text-white px-4 py-3 rounded-[10px] hover:bg-black cursor-pointer"
       >
         Continue
       </button>
