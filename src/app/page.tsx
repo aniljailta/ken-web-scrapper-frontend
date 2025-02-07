@@ -1,36 +1,33 @@
 "use client";
 
+import { useConversation } from "@/providers/ConversationProvider";
 import { useSession } from "next-auth/react";
-import Image from "next/image";
+import { useRouter } from "next/navigation";
 
 import { useState } from "react";
-import { useForm } from "react-hook-form";
+import { InputComponent } from "./components/InputComponent";
 
 export default function Home() {
   const { data: sessionUser } = useSession();
+  const router = useRouter();
 
-  const {
-    register,
-    handleSubmit,
-    reset,
-    formState: { errors },
-  } = useForm<{ productQuestion: string }>();
-
-  const [messages, setMessages] = useState<{ role: string; content: string }[]>(
-    []
-  );
   const [isTyping, setIsTyping] = useState<boolean>(false);
 
-  const [conversationId, setConversationId] = useState<string>("");
+  const { conversationState, setConversationState } = useConversation();
 
-  const onSubmit = async (data: { productQuestion: string }) => {
-    if (!data.productQuestion) return;
+  const { messages } = conversationState;
+
+  const onSubmit = async (productQuestion: string, reset: () => void) => {
+    if (!productQuestion) return;
 
     try {
-      setMessages((prevMessages) => [
-        ...prevMessages,
-        { role: "user", content: data.productQuestion },
-      ]);
+      setConversationState((prev) => ({
+        ...prev,
+        messages: [
+          ...prev.messages,
+          { role: "user", content: productQuestion },
+        ],
+      }));
 
       setIsTyping(true);
 
@@ -45,8 +42,7 @@ export default function Home() {
             }`,
           },
           body: JSON.stringify({
-            question: data.productQuestion,
-            conversationId,
+            question: productQuestion,
           }),
         }
       );
@@ -57,83 +53,60 @@ export default function Home() {
 
       if (responseData.data) {
         simulateTypingEffect(responseData.data);
-        setConversationId(responseData?.conversationId);
+        setConversationState((prev) => ({
+          ...prev,
+          conversationId: responseData?.conversationId,
+        }));
+        router.push(`/search/${responseData?.conversationId}`);
       } else {
-        setMessages((prevMessages) => [
-          ...prevMessages,
-          {
-            role: "assistant",
-            content: responseData.message || "No response received",
-          },
-        ]);
+        setConversationState((prev) => ({
+          ...prev,
+          messages: [
+            ...prev.messages,
+            {
+              role: "assistant",
+              content: responseData.message || "No response received",
+            },
+          ],
+        }));
       }
     } catch (err) {
       console.error(err);
-      setMessages((prevMessages) => [
-        ...prevMessages,
-        { role: "assistant", content: "Something went wrong." },
-      ]);
+      setConversationState((prev) => ({
+        ...prev,
+        messages: [
+          ...prev.messages,
+          { role: "assistant", content: "Something went wrong." },
+        ],
+      }));
     }
   };
 
   // Simulate Typing Effect
   const simulateTypingEffect = (response: string) => {
     let index = 0;
-    setMessages((prevMessages) => [
-      ...prevMessages,
-      { role: "assistant", content: "" },
-    ]);
+
+    setConversationState((prev) => ({
+      ...prev,
+      messages: [...prev.messages, { role: "assistant", content: "" }],
+    }));
 
     const typingInterval = setInterval(() => {
-      setMessages((prevMessages) =>
-        prevMessages.map((msg, i) =>
-          i === prevMessages.length - 1 && msg.role === "assistant"
+      setConversationState((prev) => ({
+        ...prev,
+        messages: prev.messages.map((msg, i) =>
+          i === prev.messages.length - 1 && msg.role === "assistant"
             ? { ...msg, content: msg.content + response[index - 1] }
             : msg
-        )
-      );
+        ),
+      }));
+
       index++;
 
       if (index >= response.length) {
         clearInterval(typingInterval);
       }
     }, 20);
-  };
-
-  const InputComponent = () => {
-    return (
-      <div className="space-y-4 w-full max-w-2xl mx-auto">
-        <form onSubmit={handleSubmit(onSubmit)}>
-          <div className="relative max-w-lg mx-auto">
-            <input
-              {...register("productQuestion", {
-                required: "This field is required",
-              })}
-              placeholder="Enter Cisco PID or Product"
-              type="text"
-              className="mt-1 block w-full h-[45px] bg-[#FFE45A]/10 rounded-[10px] border border-[#A2A2A2] pl-4 py-3 pr-10 placeholder:text-black/70"
-            />
-            {errors.productQuestion && (
-              <p className="text-red-500 text-sm mt-1">
-                {errors.productQuestion.message}
-              </p>
-            )}
-
-            <div
-              className="absolute top-3 right-3.5 cursor-pointer"
-              onClick={handleSubmit(onSubmit)}
-            >
-              <Image
-                src="/images/arrow.svg"
-                alt="arrow"
-                width={20}
-                height={20}
-              />
-            </div>
-          </div>
-        </form>
-      </div>
-    );
   };
 
   return (
@@ -145,7 +118,7 @@ export default function Home() {
               What PID do you have?
             </h1>
 
-            <InputComponent />
+            <InputComponent onSubmit={onSubmit} />
           </div>
         )}
 
@@ -168,7 +141,7 @@ export default function Home() {
               )}
             </div>
             <div className="mt-4">
-              <InputComponent />
+              <InputComponent onSubmit={onSubmit} />
             </div>
           </div>
         )}

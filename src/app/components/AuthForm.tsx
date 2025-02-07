@@ -128,7 +128,7 @@ export default function AuthForm({ mode }: AuthFormProps) {
             required
             value={name}
             onChange={(e) => setName(e.target.value)}
-            className="mt-1 block w-[360px] h-[45px] rounded-[10px] border border-[#A2A2A2] px-4 py-3 "
+            className="mt-1 block w-full max-w-[360px] h-[45px] rounded-[10px] border border-[#A2A2A2] px-4 py-3 "
           />
         </div>
       )}
@@ -139,7 +139,7 @@ export default function AuthForm({ mode }: AuthFormProps) {
           required
           value={email}
           onChange={(e) => setEmail(e.target.value)}
-          className="mt-1 block w-[360px] h-[45px] rounded-[10px] border border-[#A2A2A2] px-4 py-3"
+          className="mt-1 block w-full max-w-[360px] h-[45px] rounded-[10px] border border-[#A2A2A2] px-4 py-3"
         />
       </div>
       <div>
@@ -149,13 +149,13 @@ export default function AuthForm({ mode }: AuthFormProps) {
           required
           value={password}
           onChange={(e) => setPassword(e.target.value)}
-          className="mt-1 block w-[360px] h-[45px] rounded-[10px] border border-[#A2A2A2] px-4 py-3"
+          className="mt-1 block w-full max-w-[360px] h-[45px] rounded-[10px] border border-[#A2A2A2] px-4 py-3"
         />
       </div>
       {error && <p className="text-red-500 text-sm">{error}</p>}
       <button
         type="submit"
-        className="w-[360px] h-[45px] bg-[#BFBFBF] text-white px-4 py-3 rounded-[10px] hover:bg-black cursor-pointer"
+        className="w-full max-w-[360px] h-[45px] bg-[#BFBFBF] text-white px-4 py-3 rounded-[10px] hover:bg-black cursor-pointer"
       >
         Continue
       </button>

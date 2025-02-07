@@ -4,6 +4,7 @@ import { AuthProvider } from "./providers";
 
 import { Roboto_Mono } from "next/font/google";
 import HeaderLayout from "./components/HeaderLayout";
+import { ConversationProvider } from "@/providers/ConversationProvider";
 
 const robotoMono = Roboto_Mono({
   subsets: ["latin"],
@@ -20,7 +21,9 @@ export default function RootLayout({
     <html lang="en" suppressHydrationWarning className={robotoMono.className}>
       <body>
         <AuthProvider>
-          <HeaderLayout>{children}</HeaderLayout>
+          <ConversationProvider>
+            <HeaderLayout>{children}</HeaderLayout>
+          </ConversationProvider>
         </AuthProvider>
       </body>
     </html>
