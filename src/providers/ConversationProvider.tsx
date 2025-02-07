@@ -5,6 +5,7 @@ import {
   useCallback,
   useContext,
   useEffect,
+  useRef,
   useState,
 } from "react";
 
@@ -48,50 +49,62 @@ export const ConversationProvider: React.FC<ConversationProviderProps> = ({
     }
   );
 
+  const sessionAccessToken = useRef<string | undefined>(undefined);
+
+  useEffect(() => {
+    sessionAccessToken.current = sessionUser?.user?.access_token;
+  }, [sessionUser?.user?.access_token]);
+
   const fetchMessages = useCallback(
-    async (queryChatId: string) => {
-      try {
-        setConversationState((prev) => ({ ...prev, messageLoading: true }));
+    async () => {
+      if (sessionAccessToken.current && queryChatId) {
+        try {
+          setConversationState((prev) => ({ ...prev, messageLoading: true }));
 
-        const response = await fetch(
-          `${process.env.NEXT_PUBLIC_API_URL}conversation/messages?conversationId=${queryChatId}`,
-          {
-            method: "GET",
-            headers: {
-              "Content-Type": "application/json",
-              Authorization: `Bearer ${
-                sessionUser ? sessionUser.user.access_token : ""
-              }`,
-            },
+          const response = await fetch(
+            `${process.env.NEXT_PUBLIC_API_URL}conversation/messages?conversationId=${queryChatId}`,
+            {
+              method: "GET",
+              headers: {
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${sessionAccessToken.current || ""}`,
+              },
+            }
+          );
+
+          if (!response.ok) {
+            router.push("/");
+            return;
           }
-        );
 
-        if (!response.ok) {
+          const data = await response.json();
+          setConversationState((prev) => ({
+            ...prev,
+            conversationId: queryChatId,
+            messages: data.messages,
+            messageLoading: false,
+          }));
+        } catch (error) {
+          console.error("Error fetching messages:", error);
+          setConversationState((prev) => ({
+            ...prev,
+            messageLoading: false,
+            conversationId: "",
+            messages: [],
+          }));
           router.push("/");
-          return;
         }
-
-        const data = await response.json();
-        setConversationState((prev) => ({
-          ...prev,
-          conversationId: queryChatId,
-          messages: data.messages,
-          messageLoading: false,
-        }));
-      } catch (error) {
-        console.error("Error fetching messages:", error);
-        setConversationState((prev) => ({ ...prev, messageLoading: false }));
-        router.push("/");
       }
     },
-    [sessionUser, router] // Dependencies
+    [queryChatId, router] // Dependencies
   );
 
   useEffect(() => {
-    if (sessionUser && queryChatId) {
-      fetchMessages(queryChatId);
+    if (sessionAccessToken.current) {
+      fetchMessages();
     }
-  }, [sessionUser, queryChatId, fetchMessages]);
+  }, [fetchMessages]);
+
   return (
     <ConversationContext.Provider
       value={{ conversationState, setConversationState }}

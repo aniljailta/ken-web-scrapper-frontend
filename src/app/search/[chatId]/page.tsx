@@ -3,14 +3,14 @@
 import { useConversation } from "@/providers/ConversationProvider";
 import { useSession } from "next-auth/react";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { InputComponent } from "../../components/InputComponent";
-import { useRouter } from "next/navigation";
+
 import Link from "next/link";
 
 export default function SearchPage() {
   const { data: sessionUser } = useSession();
-  const router = useRouter();
+
   const [isTyping, setIsTyping] = useState<boolean>(false);
 
   const { conversationState, setConversationState } = useConversation();
@@ -109,12 +109,6 @@ export default function SearchPage() {
       }
     }, 20);
   };
-
-  useEffect(() => {
-    if (messages.length === 0 && !conversationId) {
-      router.push("/");
-    }
-  }, [messages, conversationId, router]);
 
   return (
     <div className="flex flex-col min-h-[78vh] items-center justify-between">
