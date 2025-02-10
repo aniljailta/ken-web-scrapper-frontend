@@ -5,6 +5,7 @@ import { AuthProvider } from "./providers";
 import { Roboto_Mono } from "next/font/google";
 import HeaderLayout from "./components/HeaderLayout";
 import { ConversationProvider } from "@/providers/ConversationProvider";
+import { Toaster } from "sonner";
 
 const robotoMono = Roboto_Mono({
   subsets: ["latin"],
@@ -22,6 +23,7 @@ export default function RootLayout({
       <body>
         <AuthProvider>
           <ConversationProvider>
+            <Toaster position="top-right" />
             <HeaderLayout>{children}</HeaderLayout>
           </ConversationProvider>
         </AuthProvider>

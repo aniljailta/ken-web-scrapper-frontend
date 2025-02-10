@@ -6,6 +6,8 @@ import { useRouter } from "next/navigation";
 
 import { useState } from "react";
 import { InputComponent } from "./components/InputComponent";
+import httpService from "@/utils/httpService";
+import MarkdownText from "./components/Markdown";
 
 export default function Home() {
   const { data: sessionUser } = useSession();
@@ -31,23 +33,19 @@ export default function Home() {
 
       setIsTyping(true);
 
-      const res = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}conversation/chat`,
+      const res = await httpService.post(
+        "conversation/chat",
+        { question: productQuestion },
         {
-          method: "POST",
           headers: {
-            "Content-Type": "application/json",
             Authorization: `Bearer ${
               sessionUser ? sessionUser.user.access_token : ""
             }`,
           },
-          body: JSON.stringify({
-            question: productQuestion,
-          }),
         }
       );
 
-      const responseData = await res.json();
+      const responseData = await res.data;
       setIsTyping(false);
       reset(); // Reset form after submission
 
@@ -130,7 +128,7 @@ export default function Home() {
                   key={index}
                   className={`p-4 rounded-lg break-words text-base font-light text-black/75`}
                 >
-                  {message.content}
+                  <MarkdownText text={message.content} />
                 </div>
               ))}
 

@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import CredentialsProvider from "next-auth/providers/credentials";
 import type { AuthOptions, SessionStrategy } from "next-auth";
+import httpService from "@/utils/httpService";
 
 export const authOptions: AuthOptions = {
   session: {
@@ -21,26 +22,15 @@ export const authOptions: AuthOptions = {
         }
 
         try {
-          const response = await fetch(
-            `${process.env.NEXT_API_URL}auth/login`,
-            {
-              method: "POST",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({
-                email: credentials.email,
-                password: credentials.password,
-              }),
-            }
-          );
+          const response = await httpService.post("auth/login", {
+            email: credentials.email,
+            password: credentials.password,
+          });
 
-          if (!response.ok) {
-            throw new Error("Invalid credentials");
-          }
-
-          const user = await response.json();
+          const user = await response.data;
 
           if (!user || !user.id) {
-            throw new Error("Invalid response from server");
+            throw new Error("Invalid credentials");
           }
 
           return {

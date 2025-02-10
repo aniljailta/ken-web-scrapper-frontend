@@ -24,7 +24,7 @@ export default function SignupPage() {
             Already have an account?{" "}
             <Link passHref href="/login">
               {" "}
-              <span className="cursor-pointer text-[#0000FF]">Login</span>
+              <span className="cursor-pointer text-indigo-700/75">Login</span>
             </Link>
           </p>
         </div>
