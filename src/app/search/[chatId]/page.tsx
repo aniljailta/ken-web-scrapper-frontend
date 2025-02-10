@@ -7,6 +7,8 @@ import { useState } from "react";
 import { InputComponent } from "../../components/InputComponent";
 
 import Link from "next/link";
+import httpService from "@/utils/httpService";
+import MarkdownText from "@/app/components/Markdown";
 
 export default function SearchPage() {
   const { data: sessionUser } = useSession();
@@ -31,24 +33,19 @@ export default function SearchPage() {
 
       setIsTyping(true);
 
-      const res = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}conversation/thread`,
+      const res = await httpService.post(
+        "conversation/thread",
+        { question: productQuestion, conversationId },
         {
-          method: "POST",
           headers: {
-            "Content-Type": "application/json",
             Authorization: `Bearer ${
               sessionUser ? sessionUser.user.access_token : ""
             }`,
           },
-          body: JSON.stringify({
-            question: productQuestion,
-            conversationId,
-          }),
         }
       );
 
-      const responseData = await res.json();
+      const responseData = await res.data;
       setIsTyping(false);
       reset(); // Reset form after submission
 
@@ -144,7 +141,7 @@ export default function SearchPage() {
                     key={index}
                     className="p-4 rounded-lg break-words text-base font-light text-black/75"
                   >
-                    {message.content}
+                    <MarkdownText text={message.content} />
                   </div>
                 ))}
 
@@ -164,7 +161,10 @@ export default function SearchPage() {
                   </div>
                 ) : (
                   // Input field component once loading is complete
-                  <InputComponent onSubmit={onSubmit} />
+                  <InputComponent
+                    onSubmit={onSubmit}
+                    placeholder="What would you like to know?"
+                  />
                 )}
               </div>
             </div>

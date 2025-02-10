@@ -24,7 +24,7 @@ export default function LoginPage() {
             Don’t have an account?{" "}
             <Link passHref href="/signup">
               {" "}
-              <span className="cursor-pointer text-[#0000FF]">Sign up</span>
+              <span className="cursor-pointer text-indigo-700/75">Sign up</span>
             </Link>
           </p>
         </div>

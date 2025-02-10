@@ -1,9 +1,11 @@
-import { signOut, useSession } from "next-auth/react";
+import { useSession } from "next-auth/react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { Conversation } from "../types";
 import Image from "next/image";
+import httpService from "@/utils/httpService";
+import { useConversation } from "@/providers/ConversationProvider";
 
 export default function HeaderLayout({
   children,
@@ -11,6 +13,7 @@ export default function HeaderLayout({
   children: React.ReactNode;
 }) {
   const { data: session } = useSession();
+  const { handleLogout } = useConversation();
   const router = useRouter();
   const [dropdownOpen, setDropdownOpen] = useState<boolean>(false);
 
@@ -26,25 +29,19 @@ export default function HeaderLayout({
 
   const fetchChatList = async () => {
     try {
-      const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}conversation/all-chat`,
-        {
-          method: "GET",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${
-              session && session.user ? session.user.access_token : ""
-            }`,
-          },
-        }
-      );
-
-      if (!response.ok) {
+      const response = await httpService.get("conversation/all-chat", {
+        headers: {
+          Authorization: `Bearer ${
+            session && session.user ? session.user.access_token : ""
+          }`,
+        },
+      });
+      const data = await response.data;
+      if (!data) {
         router.push("/");
         return;
       }
 
-      const data = await response.json();
       setChatList(data);
     } catch (error) {
       console.error("Error fetching messages:", error);
@@ -111,25 +108,22 @@ export default function HeaderLayout({
                           </Link>
                         ))}
                       </div>
-                      <div className="flex justify-between items-center gap-2">
-                        <div>
-                          {session.user.role === "admin" && (
-                            <div
-                              className="text-sm text-black cursor-pointer"
-                              onClick={() => {
-                                router.push("/admin");
-                              }}
-                            >
-                              Dashboard
-                            </div>
-                          )}
+                      {session.user.role === "admin" && (
+                        <div className="flex justify-end items-center gap-2">
+                          <div
+                            className="text-sm text-black cursor-pointer"
+                            onClick={() => {
+                              router.push("/admin");
+                            }}
+                          >
+                            System Instruction
+                          </div>
                         </div>
+                      )}
+                      <div className="flex justify-end items-center gap-2">
                         <div
                           className="text-sm text-black cursor-pointer"
-                          onClick={() => {
-                            signOut();
-                            router.push("/");
-                          }}
+                          onClick={handleLogout}
                         >
                           Logout
                         </div>

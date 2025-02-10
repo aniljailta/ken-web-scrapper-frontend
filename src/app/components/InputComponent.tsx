@@ -6,8 +6,10 @@ type FormValue = {
 };
 export const InputComponent = ({
   onSubmit,
+  placeholder = "Enter Cisco PID or Product",
 }: {
   onSubmit: (value: string, reset: () => void) => void;
+  placeholder?: string;
 }) => {
   const {
     register,
@@ -28,9 +30,9 @@ export const InputComponent = ({
             {...register("productQuestion", {
               required: "This field is required",
             })}
-            placeholder="Enter Cisco PID or Product"
+            placeholder={placeholder}
             type="text"
-            className="mt-1 block w-full h-[45px] bg-[#FFE45A]/10 rounded-[10px] border border-[#A2A2A2] pl-4 py-3 pr-10 placeholder:text-black/70"
+            className="mt-1 block w-full h-[45px] bg-yellow-300/10 rounded-[10px] border border-neutral-400 pl-4 py-3 pr-10 placeholder:text-black/70"
           />
           {errors.productQuestion && (
             <p className="text-red-500 text-sm mt-1">

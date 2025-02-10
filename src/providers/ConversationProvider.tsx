@@ -1,13 +1,7 @@
-import { useSession } from "next-auth/react";
+import httpService from "@/utils/httpService";
+import { signOut, useSession } from "next-auth/react";
 import { useParams, useRouter } from "next/navigation";
-import {
-  createContext,
-  useCallback,
-  useContext,
-  useEffect,
-  useRef,
-  useState,
-} from "react";
+import { createContext, useContext, useEffect, useState } from "react";
 
 type ConversationProviderProps = {
   children: React.ReactNode;
@@ -27,6 +21,7 @@ type ConversationState = {
 type ConversationContextType = {
   conversationState: ConversationState;
   setConversationState: React.Dispatch<React.SetStateAction<ConversationState>>;
+  handleLogout: () => void;
 };
 
 const ConversationContext = createContext<ConversationContextType | undefined>(
@@ -49,65 +44,62 @@ export const ConversationProvider: React.FC<ConversationProviderProps> = ({
     }
   );
 
-  const sessionAccessToken = useRef<string | undefined>(undefined);
+  const fetchMessages = async () => {
+    if (!sessionUser?.user?.access_token || !queryChatId) return;
 
-  useEffect(() => {
-    sessionAccessToken.current = sessionUser?.user?.access_token;
-  }, [sessionUser?.user?.access_token]);
+    try {
+      setConversationState((prev) => ({ ...prev, messageLoading: true }));
 
-  const fetchMessages = useCallback(
-    async () => {
-      if (sessionAccessToken.current && queryChatId) {
-        try {
-          setConversationState((prev) => ({ ...prev, messageLoading: true }));
-
-          const response = await fetch(
-            `${process.env.NEXT_PUBLIC_API_URL}conversation/messages?conversationId=${queryChatId}`,
-            {
-              method: "GET",
-              headers: {
-                "Content-Type": "application/json",
-                Authorization: `Bearer ${sessionAccessToken.current || ""}`,
-              },
-            }
-          );
-
-          if (!response.ok) {
-            router.push("/");
-            return;
-          }
-
-          const data = await response.json();
-          setConversationState((prev) => ({
-            ...prev,
-            conversationId: queryChatId,
-            messages: data.messages,
-            messageLoading: false,
-          }));
-        } catch (error) {
-          console.error("Error fetching messages:", error);
-          setConversationState((prev) => ({
-            ...prev,
-            messageLoading: false,
-            conversationId: "",
-            messages: [],
-          }));
-          router.push("/");
+      const response = await httpService.get(
+        `conversation/messages?conversationId=${queryChatId}`,
+        {
+          headers: {
+            Authorization: `Bearer ${sessionUser.user.access_token}`,
+          },
         }
+      );
+
+      const data = await response.data;
+
+      if (!data) {
+        router.push("/");
+        return;
       }
-    },
-    [queryChatId, router] // Dependencies
-  );
+
+      setConversationState((prev) => ({
+        ...prev,
+        conversationId: queryChatId,
+        messages: data.messages,
+        messageLoading: false,
+      }));
+    } catch (error) {
+      console.error("Error fetching messages:", error);
+      setConversationState((prev) => ({
+        ...prev,
+        messageLoading: false,
+        conversationId: "",
+        messages: [],
+      }));
+      router.push("/");
+    }
+  };
 
   useEffect(() => {
-    if (sessionAccessToken.current) {
-      fetchMessages();
-    }
-  }, [fetchMessages]);
+    fetchMessages();
+  }, [sessionUser?.user?.access_token, queryChatId, router]);
+
+  const handleLogout = async () => {
+    await signOut({ callbackUrl: "/" });
+    setConversationState({
+      messages: [],
+      conversationId: "",
+      messageLoading: false,
+    });
+  };
 
   return (
     <ConversationContext.Provider
-      value={{ conversationState, setConversationState }}
+      value={{ conversationState, setConversationState, handleLogout }}
     >
       {children}
     </ConversationContext.Provider>

@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { signIn } from "next-auth/react";
 import { useRouter } from "next/navigation";
+import httpService from "@/utils/httpService";
 
 type AuthFormProps = {
   mode: "login" | "signup";
@@ -43,20 +44,18 @@ export default function AuthForm({ mode }: AuthFormProps) {
 
   // API calls
   const signupUser = async (email: string, password: string, name: string) => {
-    const res = await fetch(
-      `${process.env.NEXT_PUBLIC_API_URL}users/register`,
-      {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password, name, role: "user" }),
-      }
-    );
+    const res = await httpService.post("users/register", {
+      email,
+      password,
+      name,
+      role: "user",
+    });
 
     if (!res) {
       throw new Error("Invalid credentials");
     }
 
-    const data = await res.json();
+    const data = await res.data;
     if (!data) {
       throw new Error("Invalid response from server");
     }
@@ -128,7 +127,7 @@ export default function AuthForm({ mode }: AuthFormProps) {
             required
             value={name}
             onChange={(e) => setName(e.target.value)}
-            className="mt-1 block w-full max-w-[360px] h-[45px] rounded-[10px] border border-[#A2A2A2] px-4 py-3 "
+            className="mt-1 block w-full max-w-[360px] h-[45px] rounded-[10px] border border-neutral-400 px-4 py-3 "
           />
         </div>
       )}
@@ -139,7 +138,7 @@ export default function AuthForm({ mode }: AuthFormProps) {
           required
           value={email}
           onChange={(e) => setEmail(e.target.value)}
-          className="mt-1 block w-full max-w-[360px] h-[45px] rounded-[10px] border border-[#A2A2A2] px-4 py-3"
+          className="mt-1 block w-full max-w-[360px] h-[45px] rounded-[10px] border border-neutral-400 px-4 py-3"
         />
       </div>
       <div>
@@ -149,13 +148,13 @@ export default function AuthForm({ mode }: AuthFormProps) {
           required
           value={password}
           onChange={(e) => setPassword(e.target.value)}
-          className="mt-1 block w-full max-w-[360px] h-[45px] rounded-[10px] border border-[#A2A2A2] px-4 py-3"
+          className="mt-1 block w-full max-w-[360px] h-[45px] rounded-[10px] border border-neutral-400 px-4 py-3"
         />
       </div>
       {error && <p className="text-red-500 text-sm">{error}</p>}
       <button
         type="submit"
-        className="w-full max-w-[360px] h-[45px] bg-[#BFBFBF] text-white px-4 py-3 rounded-[10px] hover:bg-black cursor-pointer"
+        className="w-full max-w-[360px] h-[45px] bg-neutral-300 text-white px-4 py-3 rounded-[10px] hover:bg-black cursor-pointer"
       >
         Continue
       </button>
