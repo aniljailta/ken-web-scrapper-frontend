@@ -4,6 +4,7 @@ import { useState } from "react";
 import { signIn } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import httpService from "@/utils/httpService";
+import { ROLE_TYPE } from "@/utils/constant";
 
 type AuthFormProps = {
   mode: "login" | "signup";
@@ -48,7 +49,7 @@ export default function AuthForm({ mode }: AuthFormProps) {
       email,
       password,
       name,
-      role: "user",
+      role: ROLE_TYPE.USER,
     });
 
     if (!res) {

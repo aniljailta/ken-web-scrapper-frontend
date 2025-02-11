@@ -3,9 +3,9 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { Conversation } from "../types";
-import Image from "next/image";
 import httpService from "@/utils/httpService";
-import { useConversation } from "@/providers/ConversationProvider";
+import SideDrawer from "./SideDrawer";
+import { getInitials } from "@/utils/helper";
 
 export default function HeaderLayout({
   children,
@@ -13,19 +13,10 @@ export default function HeaderLayout({
   children: React.ReactNode;
 }) {
   const { data: session } = useSession();
-  const { handleLogout } = useConversation();
   const router = useRouter();
-  const [dropdownOpen, setDropdownOpen] = useState<boolean>(false);
 
+  const [open, setOpen] = useState<boolean>(false);
   const [chatList, setChatList] = useState<Conversation[]>([]);
-
-  const getInitials = (name: string) => {
-    if (!name) return "GU";
-    const nameParts = name.trim().split(" ");
-    return nameParts.length === 1
-      ? (nameParts[0][0] + nameParts[0].slice(-1)).toUpperCase()
-      : (nameParts[0][0] + nameParts[nameParts.length - 1][0]).toUpperCase();
-  };
 
   const fetchChatList = async () => {
     try {
@@ -67,71 +58,13 @@ export default function HeaderLayout({
               </p>
             </Link>
             {session?.user ? (
-              <div className="relative">
-                <div
-                  className="w-[50px] h-[47px] grid place-content-center bg-black text-white rounded-full cursor-pointer"
-                  onClick={() => setDropdownOpen(!dropdownOpen)}
-                >
-                  {getInitials(session.user.name)}
-                </div>
-                {dropdownOpen && (
-                  <div className="absolute right-0 mt-2 min-w-64 bg-white shadow-lg rounded-lg border border-gray-400">
-                    <div className="p-3 xl:p-5 space-y-4">
-                      <div
-                        className="flex justify-end cursor-pointer"
-                        onClick={() => setDropdownOpen(!dropdownOpen)}
-                      >
-                        <Image
-                          src="/images/cross.svg"
-                          alt="arrow"
-                          width={18}
-                          height={18}
-                        />
-                      </div>
-                      <div className="space-y-2">
-                        {chatList.map((chat, idx) => (
-                          <Link
-                            key={chat.id}
-                            passHref
-                            href={`/search/${chat.id}`}
-                            className="block p-2 hover:bg-gray-100"
-                            onClick={() => setDropdownOpen(!dropdownOpen)}
-                          >
-                            <div className="">
-                              <p className="text-xs text-black font-medium">
-                                {String(idx + 1).padStart(3, "0")} Report
-                              </p>
-                              <p className="text-xs text-black font-light">
-                                {chat.productName}
-                              </p>
-                            </div>
-                          </Link>
-                        ))}
-                      </div>
-                      {session.user.role === "admin" && (
-                        <div className="flex justify-end items-center gap-2">
-                          <div
-                            className="text-sm text-black cursor-pointer"
-                            onClick={() => {
-                              router.push("/admin");
-                            }}
-                          >
-                            System Instruction
-                          </div>
-                        </div>
-                      )}
-                      <div className="flex justify-end items-center gap-2">
-                        <div
-                          className="text-sm text-black cursor-pointer"
-                          onClick={handleLogout}
-                        >
-                          Logout
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                )}
-              </div>
+              <SideDrawer
+                chatList={chatList}
+                session={session}
+                fetchChatList={fetchChatList}
+                open={open}
+                setOpen={setOpen}
+              />
             ) : (
               <div className="flex justify-between gap-2">
                 <Link href={"/signup"} passHref>
@@ -168,7 +101,7 @@ export default function HeaderLayout({
             {session?.user ? (
               <div
                 className="w-10 h-10 grid place-content-center bg-black text-white rounded-full cursor-pointer"
-                onClick={() => setDropdownOpen(!dropdownOpen)}
+                onClick={() => setOpen(!open)}
               >
                 {getInitials(session.user.name)}
               </div>

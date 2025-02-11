@@ -9,14 +9,14 @@ import { InputComponent } from "../../components/InputComponent";
 import Link from "next/link";
 import httpService from "@/utils/httpService";
 import MarkdownText from "@/app/components/Markdown";
+import { LoadingSvg, ThumbsDown, ThumbsUp } from "@/svg";
+import { ROLE_TYPE } from "@/utils/constant";
 
 export default function SearchPage() {
   const { data: sessionUser } = useSession();
 
   const [isTyping, setIsTyping] = useState<boolean>(false);
-
   const { conversationState, setConversationState } = useConversation();
-
   const { messages, conversationId, messageLoading } = conversationState;
 
   const onSubmit = async (productQuestion: string, reset: () => void) => {
@@ -27,7 +27,11 @@ export default function SearchPage() {
         ...prev,
         messages: [
           ...prev.messages,
-          { role: "user", content: productQuestion },
+          {
+            role: ROLE_TYPE.USER,
+            content: productQuestion,
+            reactionStatus: null,
+          },
         ],
       }));
 
@@ -61,8 +65,9 @@ export default function SearchPage() {
           messages: [
             ...prev.messages,
             {
-              role: "assistant",
+              role: ROLE_TYPE.ASSISTANT,
               content: responseData.message || "No response received",
+              reactionStatus: responseData.reactionStatus || null,
             },
           ],
         }));
@@ -74,7 +79,11 @@ export default function SearchPage() {
         ...prev,
         messages: [
           ...prev.messages,
-          { role: "assistant", content: "Something went wrong." },
+          {
+            role: ROLE_TYPE.ASSISTANT,
+            content: "Something went wrong.",
+            reactionStatus: null,
+          },
         ],
       }));
     }
@@ -86,14 +95,17 @@ export default function SearchPage() {
 
     setConversationState((prev) => ({
       ...prev,
-      messages: [...prev.messages, { role: "assistant", content: "" }],
+      messages: [
+        ...prev.messages,
+        { role: ROLE_TYPE.ASSISTANT, content: "", reactionStatus: null },
+      ],
     }));
 
     const typingInterval = setInterval(() => {
       setConversationState((prev) => ({
         ...prev,
         messages: prev.messages.map((msg, i) =>
-          i === prev.messages.length - 1 && msg.role === "assistant"
+          i === prev.messages.length - 1 && msg.role === ROLE_TYPE.ASSISTANT
             ? { ...msg, content: msg.content + response[index - 1] }
             : msg
         ),
@@ -105,6 +117,45 @@ export default function SearchPage() {
         clearInterval(typingInterval);
       }
     }, 20);
+  };
+
+  const handleReaction = async ({
+    messageId,
+    newStatus,
+  }: {
+    messageId: string;
+    newStatus: boolean | null;
+  }) => {
+    setConversationState((prev) => ({
+      ...prev,
+      messages: prev.messages.map((msg) =>
+        msg.id === messageId ? { ...msg, reactionStatus: newStatus } : msg
+      ),
+    }));
+
+    try {
+      await httpService.post(
+        "conversation/message/reaction",
+        { messageId, reactionStatus: newStatus },
+        {
+          headers: {
+            Authorization: `Bearer ${
+              sessionUser ? sessionUser.user.access_token : ""
+            }`,
+          },
+        }
+      );
+    } catch (error) {
+      console.error("Failed to update reaction:", error);
+
+      // Rollback UI state if API fails
+      setConversationState((prev) => ({
+        ...prev,
+        messages: prev.messages.map((msg) =>
+          msg.id === messageId ? { ...msg, reactionStatus: !newStatus } : msg
+        ),
+      }));
+    }
   };
 
   return (
@@ -139,15 +190,54 @@ export default function SearchPage() {
                 {messages.map((message, index) => (
                   <div
                     key={index}
-                    className="p-4 rounded-lg break-words text-base font-light text-black/75"
+                    className={`p-4 rounded-lg break-words  text-black/75 ${
+                      message.role === ROLE_TYPE.USER
+                        ? "text-xl font-normal"
+                        : "text-base font-light"
+                    }`}
                   >
                     <MarkdownText text={message.content} />
+
+                    {message.role !== ROLE_TYPE.USER && (
+                      <div className="flex gap-8 mt-4 cursor-pointer">
+                        {/* Like Button */}
+                        <div
+                          onClick={() =>
+                            handleReaction({
+                              messageId: message?.id || "",
+                              newStatus:
+                                message.reactionStatus === true ? null : true,
+                            })
+                          }
+                        >
+                          <ThumbsUp
+                            isActive={Boolean(message.reactionStatus)}
+                          />
+                        </div>
+
+                        {/* Dislike Button */}
+                        <div
+                          onClick={() =>
+                            handleReaction({
+                              messageId: message?.id || "",
+                              newStatus:
+                                message.reactionStatus === false ? null : false,
+                            })
+                          }
+                        >
+                          <ThumbsDown
+                            isActive={message.reactionStatus === false}
+                          />
+                        </div>
+                      </div>
+                    )}
                   </div>
                 ))}
 
                 {isTyping && (
-                  <div className="p-4 bg-gray-100 text-gray-900 mr-auto rounded-lg break-words">
-                    <span className="animate-pulse">Retrieving PID...</span>
+                  <div className="p-4 bg-gray-100 text-gray-900 mr-auto rounded-lg flex items-center gap-2">
+                    <span className="animate-pulse">Retrieving PID</span>
+                    <LoadingSvg />
                   </div>
                 )}
               </div>
