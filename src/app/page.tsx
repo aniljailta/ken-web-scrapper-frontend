@@ -8,15 +8,14 @@ import { useState } from "react";
 import { InputComponent } from "./components/InputComponent";
 import httpService from "@/utils/httpService";
 import MarkdownText from "./components/Markdown";
+import { LoadingSvg } from "@/svg";
+import { ROLE_TYPE } from "@/utils/constant";
 
 export default function Home() {
   const { data: sessionUser } = useSession();
   const router = useRouter();
-
   const [isTyping, setIsTyping] = useState<boolean>(false);
-
   const { conversationState, setConversationState } = useConversation();
-
   const { messages } = conversationState;
 
   const onSubmit = async (productQuestion: string, reset: () => void) => {
@@ -27,7 +26,7 @@ export default function Home() {
         ...prev,
         messages: [
           ...prev.messages,
-          { role: "user", content: productQuestion },
+          { role: ROLE_TYPE.USER, content: productQuestion },
         ],
       }));
 
@@ -62,7 +61,7 @@ export default function Home() {
           messages: [
             ...prev.messages,
             {
-              role: "assistant",
+              role: ROLE_TYPE.ASSISTANT,
               content: responseData.message || "No response received",
             },
           ],
@@ -74,7 +73,7 @@ export default function Home() {
         ...prev,
         messages: [
           ...prev.messages,
-          { role: "assistant", content: "Something went wrong." },
+          { role: ROLE_TYPE.ASSISTANT, content: "Something went wrong." },
         ],
       }));
     }
@@ -86,14 +85,14 @@ export default function Home() {
 
     setConversationState((prev) => ({
       ...prev,
-      messages: [...prev.messages, { role: "assistant", content: "" }],
+      messages: [...prev.messages, { role: ROLE_TYPE.ASSISTANT, content: "" }],
     }));
 
     const typingInterval = setInterval(() => {
       setConversationState((prev) => ({
         ...prev,
         messages: prev.messages.map((msg, i) =>
-          i === prev.messages.length - 1 && msg.role === "assistant"
+          i === prev.messages.length - 1 && msg.role === ROLE_TYPE.ASSISTANT
             ? { ...msg, content: msg.content + response[index - 1] }
             : msg
         ),
@@ -133,8 +132,9 @@ export default function Home() {
               ))}
 
               {isTyping && (
-                <div className="p-4 bg-gray-100 text-gray-900 mr-auto rounded-lg break-words">
-                  <span className="animate-pulse">Retrieving PID...</span>
+                <div className="p-4 bg-gray-100 text-gray-900 mr-auto rounded-lg flex items-center gap-2">
+                  <span className="animate-pulse">Retrieving PID</span>
+                  <LoadingSvg />
                 </div>
               )}
             </div>

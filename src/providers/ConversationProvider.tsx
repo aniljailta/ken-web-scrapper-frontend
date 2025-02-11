@@ -10,6 +10,8 @@ type ConversationProviderProps = {
 type Message = {
   role: string;
   content: string;
+  reactionStatus?: boolean | null;
+  id?: string;
 };
 
 type ConversationState = {

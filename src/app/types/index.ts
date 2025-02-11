@@ -1,3 +1,5 @@
+import { ROLE_TYPE } from "@/utils/constant";
+
 export interface Conversation {
   id: string;
   userId?: string | null;
@@ -10,7 +12,7 @@ export interface Conversation {
 export interface Message {
   id: string;
   content: string;
-  role: "user" | "assistant";
+  role: ROLE_TYPE;
   conversationId: string;
   createdAt: string;
   reactionStatus?: boolean | null;

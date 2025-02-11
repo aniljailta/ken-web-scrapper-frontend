@@ -7,6 +7,8 @@ import { useConversation } from "@/providers/ConversationProvider";
 import { toast } from "sonner";
 import httpService from "@/utils/httpService";
 import MarkdownText from "../components/Markdown";
+import { LoadingSvg } from "@/svg";
+import { ROLE_TYPE } from "@/utils/constant";
 
 function AdminPage() {
   const { data: session, status } = useSession();
@@ -106,7 +108,7 @@ function AdminPage() {
         ...prev,
         messages: [
           ...prev.messages,
-          { role: "user", content: productQuestion },
+          { role: ROLE_TYPE.USER, content: productQuestion },
         ],
       }));
 
@@ -132,7 +134,7 @@ function AdminPage() {
           messages: [
             ...prev.messages,
             {
-              role: "assistant",
+              role: ROLE_TYPE.ASSISTANT,
               content: responseData.message || "No response received",
             },
           ],
@@ -145,7 +147,7 @@ function AdminPage() {
         ...prev,
         messages: [
           ...prev.messages,
-          { role: "assistant", content: "Something went wrong." },
+          { role: ROLE_TYPE.ASSISTANT, content: "Something went wrong." },
         ],
       }));
     }
@@ -157,14 +159,14 @@ function AdminPage() {
 
     setConversationState((prev) => ({
       ...prev,
-      messages: [...prev.messages, { role: "assistant", content: "" }],
+      messages: [...prev.messages, { role: ROLE_TYPE.ASSISTANT, content: "" }],
     }));
 
     const typingInterval = setInterval(() => {
       setConversationState((prev) => ({
         ...prev,
         messages: prev.messages.map((msg, i) =>
-          i === prev.messages.length - 1 && msg.role === "assistant"
+          i === prev.messages.length - 1 && msg.role === ROLE_TYPE.ASSISTANT
             ? { ...msg, content: msg.content + response[index - 1] }
             : msg
         ),
@@ -287,8 +289,9 @@ function AdminPage() {
                   ))}
 
                   {isTyping && (
-                    <div className="p-4 bg-gray-100 text-gray-900 mr-auto rounded-lg break-words">
-                      <span className="animate-pulse">Retrieving PID...</span>
+                    <div className="p-4 bg-gray-100 text-gray-900 mr-auto rounded-lg flex gap-2">
+                      <span className="animate-pulse">Retrieving PID</span>
+                      <LoadingSvg />
                     </div>
                   )}
                 </div>
