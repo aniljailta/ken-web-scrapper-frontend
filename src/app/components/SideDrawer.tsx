@@ -47,6 +47,7 @@ function SideDrawer({
             messages: [],
             conversationId: "",
             messageLoading: false,
+            isLoadingRequest: false,
           });
           router.replace("/");
         }
@@ -102,8 +103,10 @@ function SideDrawer({
                           <p className="text-xs text-black font-medium">
                             {String(idx + 1).padStart(3, "0")} Report
                           </p>
-                          <p className="text-xs text-black font-light">
-                            {chat.productName}
+                          <p className="text-xs text-black font-light line-clamp-2">
+                            {chat.productName
+                              ? chat.productName.split(",")[0]
+                              : "Report"}
                           </p>
                         </div>
                         <div className="opacity-0 group-hover:opacity-100 transition-opacity">

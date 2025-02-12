@@ -17,10 +17,11 @@ export default function SearchPage() {
 
   const [isTyping, setIsTyping] = useState<boolean>(false);
   const { conversationState, setConversationState } = useConversation();
-  const { messages, conversationId, messageLoading } = conversationState;
+  const { messages, conversationId, messageLoading, isLoadingRequest } =
+    conversationState;
 
   const onSubmit = async (productQuestion: string, reset: () => void) => {
-    if (!productQuestion) return;
+    if (!productQuestion || isLoadingRequest) return;
 
     try {
       setConversationState((prev) => ({
@@ -33,6 +34,7 @@ export default function SearchPage() {
             reactionStatus: null,
           },
         ],
+        isLoadingRequest: true,
       }));
 
       setIsTyping(true);
@@ -54,7 +56,7 @@ export default function SearchPage() {
       reset(); // Reset form after submission
 
       if (responseData.data) {
-        simulateTypingEffect(responseData.data);
+        simulateTypingEffect(responseData.data, responseData?.messageId);
         setConversationState((prev) => ({
           ...prev,
           conversationId: responseData?.conversationId,
@@ -86,11 +88,16 @@ export default function SearchPage() {
           },
         ],
       }));
+    } finally {
+      setConversationState((prev) => ({
+        ...prev,
+        isLoadingRequest: false,
+      }));
     }
   };
 
   // Simulate Typing Effect
-  const simulateTypingEffect = (response: string) => {
+  const simulateTypingEffect = (response: string, messageId?: string) => {
     let index = 0;
 
     setConversationState((prev) => ({
@@ -106,7 +113,11 @@ export default function SearchPage() {
         ...prev,
         messages: prev.messages.map((msg, i) =>
           i === prev.messages.length - 1 && msg.role === ROLE_TYPE.ASSISTANT
-            ? { ...msg, content: msg.content + response[index - 1] }
+            ? {
+                ...msg,
+                content: msg.content + response[index - 1],
+                ...(messageId && { id: messageId }),
+              }
             : msg
         ),
       }));
@@ -132,29 +143,30 @@ export default function SearchPage() {
         msg.id === messageId ? { ...msg, reactionStatus: newStatus } : msg
       ),
     }));
+    if (messageId) {
+      try {
+        await httpService.post(
+          "conversation/message/reaction",
+          { messageId, reactionStatus: newStatus },
+          {
+            headers: {
+              Authorization: `Bearer ${
+                sessionUser ? sessionUser.user.access_token : ""
+              }`,
+            },
+          }
+        );
+      } catch (error) {
+        console.error("Failed to update reaction:", error);
 
-    try {
-      await httpService.post(
-        "conversation/message/reaction",
-        { messageId, reactionStatus: newStatus },
-        {
-          headers: {
-            Authorization: `Bearer ${
-              sessionUser ? sessionUser.user.access_token : ""
-            }`,
-          },
-        }
-      );
-    } catch (error) {
-      console.error("Failed to update reaction:", error);
-
-      // Rollback UI state if API fails
-      setConversationState((prev) => ({
-        ...prev,
-        messages: prev.messages.map((msg) =>
-          msg.id === messageId ? { ...msg, reactionStatus: !newStatus } : msg
-        ),
-      }));
+        // Rollback UI state if API fails
+        setConversationState((prev) => ({
+          ...prev,
+          messages: prev.messages.map((msg) =>
+            msg.id === messageId ? { ...msg, reactionStatus: !newStatus } : msg
+          ),
+        }));
+      }
     }
   };
 

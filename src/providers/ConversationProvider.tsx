@@ -18,6 +18,7 @@ type ConversationState = {
   messages: Message[];
   conversationId: string;
   messageLoading: boolean;
+  isLoadingRequest: boolean;
 };
 
 type ConversationContextType = {
@@ -43,6 +44,7 @@ export const ConversationProvider: React.FC<ConversationProviderProps> = ({
       messages: [],
       conversationId: queryChatId || "",
       messageLoading: false,
+      isLoadingRequest: false,
     }
   );
 
@@ -96,6 +98,7 @@ export const ConversationProvider: React.FC<ConversationProviderProps> = ({
       messages: [],
       conversationId: "",
       messageLoading: false,
+      isLoadingRequest: false,
     });
   };
 
