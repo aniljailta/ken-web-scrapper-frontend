@@ -16,10 +16,10 @@ export default function Home() {
   const router = useRouter();
   const [isTyping, setIsTyping] = useState<boolean>(false);
   const { conversationState, setConversationState } = useConversation();
-  const { messages } = conversationState;
+  const { messages, isLoadingRequest } = conversationState;
 
   const onSubmit = async (productQuestion: string, reset: () => void) => {
-    if (!productQuestion) return;
+    if (!productQuestion || isLoadingRequest) return;
 
     try {
       setConversationState((prev) => ({
@@ -28,6 +28,7 @@ export default function Home() {
           ...prev.messages,
           { role: ROLE_TYPE.USER, content: productQuestion },
         ],
+        isLoadingRequest: true,
       }));
 
       setIsTyping(true);
@@ -49,12 +50,17 @@ export default function Home() {
       reset(); // Reset form after submission
 
       if (responseData.data) {
-        simulateTypingEffect(responseData.data);
-        setConversationState((prev) => ({
-          ...prev,
-          conversationId: responseData?.conversationId,
-        }));
-        router.push(`/search/${responseData?.conversationId}`);
+        // Simulate the typing effect
+        simulateTypingEffect(responseData.data, () => {
+          // Perform the redirect only after the typing effect finishes
+          router.push(`/search/${responseData?.conversationId}`);
+
+          // Set the conversationId after redirect
+          setConversationState((prev) => ({
+            ...prev,
+            conversationId: responseData?.conversationId,
+          }));
+        });
       } else {
         setConversationState((prev) => ({
           ...prev,
@@ -76,13 +82,19 @@ export default function Home() {
           { role: ROLE_TYPE.ASSISTANT, content: "Something went wrong." },
         ],
       }));
+    } finally {
+      setConversationState((prev) => ({
+        ...prev,
+        isLoadingRequest: false,
+      }));
     }
   };
 
-  // Simulate Typing Effect
-  const simulateTypingEffect = (response: string) => {
+  // Simulate Typing Effect with callback after finishing
+  const simulateTypingEffect = (response: string, callback: () => void) => {
     let index = 0;
 
+    // Add an empty message for the typing effect
     setConversationState((prev) => ({
       ...prev,
       messages: [...prev.messages, { role: ROLE_TYPE.ASSISTANT, content: "" }],
@@ -100,8 +112,12 @@ export default function Home() {
 
       index++;
 
+      // Clear the interval when the typing effect is complete
       if (index >= response.length) {
         clearInterval(typingInterval);
+
+        // Call the callback after the typing effect is done
+        if (callback) callback();
       }
     }, 20);
   };

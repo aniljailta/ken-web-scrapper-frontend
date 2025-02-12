@@ -22,7 +22,7 @@ function AdminPage() {
 
   const { conversationState, setConversationState } = useConversation();
 
-  const { messages } = conversationState;
+  const { messages, isLoadingRequest } = conversationState;
 
   useEffect(() => {
     // Redirect if user is not admin
@@ -101,7 +101,7 @@ function AdminPage() {
   };
 
   const onSubmit = async (productQuestion: string, reset: () => void) => {
-    if (!productQuestion) return;
+    if (!productQuestion || isLoadingRequest) return;
 
     try {
       setConversationState((prev) => ({
@@ -110,6 +110,7 @@ function AdminPage() {
           ...prev.messages,
           { role: ROLE_TYPE.USER, content: productQuestion },
         ],
+        isLoadingRequest: true,
       }));
 
       setIsTyping(true);
@@ -149,6 +150,11 @@ function AdminPage() {
           ...prev.messages,
           { role: ROLE_TYPE.ASSISTANT, content: "Something went wrong." },
         ],
+      }));
+    } finally {
+      setConversationState((prev) => ({
+        ...prev,
+        isLoadingRequest: false,
       }));
     }
   };
