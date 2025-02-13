@@ -3,14 +3,16 @@
 import { useConversation } from "@/providers/ConversationProvider";
 import { useSession } from "next-auth/react";
 
-import { useState } from "react";
+import { RefObject, useRef, useState } from "react";
 import { InputComponent } from "../../components/InputComponent";
 
 import Link from "next/link";
 import httpService from "@/utils/httpService";
 import MarkdownText from "@/app/components/Markdown";
-import { LoadingSvg, ThumbsDown, ThumbsUp } from "@/svg";
+import { LoadingSvg, PencilSvg, ThumbsDown, ThumbsUp } from "@/svg";
 import { ROLE_TYPE } from "@/utils/constant";
+import { useScrollMessages } from "@/app/hooks/useScrollMessages";
+import SuggestionList from "@/app/components/SuggestionList";
 
 export default function SearchPage() {
   const { data: sessionUser } = useSession();
@@ -19,6 +21,16 @@ export default function SearchPage() {
   const { conversationState, setConversationState } = useConversation();
   const { messages, conversationId, messageLoading, isLoadingRequest } =
     conversationState;
+
+  const messageContainerRef = useRef<HTMLDivElement>(null);
+  const typingIndicatorRef = useRef<HTMLDivElement>(null);
+
+  const { scrollToLastMessage } = useScrollMessages({
+    messageContainerRef: messageContainerRef as RefObject<HTMLDivElement>,
+    typingIndicatorRef: typingIndicatorRef as RefObject<HTMLDivElement>,
+    messages,
+    isTyping,
+  });
 
   const onSubmit = async (productQuestion: string, reset: () => void) => {
     if (!productQuestion || isLoadingRequest) return;
@@ -36,6 +48,9 @@ export default function SearchPage() {
         ],
         isLoadingRequest: true,
       }));
+
+      // Scroll after adding user message
+      scrollToLastMessage();
 
       setIsTyping(true);
 
@@ -122,6 +137,11 @@ export default function SearchPage() {
         ),
       }));
 
+      // Scroll after each character is added
+      requestAnimationFrame(() => {
+        scrollToLastMessage();
+      });
+
       index++;
 
       if (index >= response.length) {
@@ -194,11 +214,19 @@ export default function SearchPage() {
                   }))
                 }
               >
-                <div className="flex justify-end">+ New Report</div>
+                <div className="flex justify-end">
+                  <div className="block md:hidden">
+                    <PencilSvg />
+                  </div>
+                  <div className="hidden md:block">+ New Report</div>
+                </div>
               </Link>
 
               {/* Message area with scroll */}
-              <div className="flex-1 overflow-y-auto space-y-4 max-w-3xl p-4">
+              <div
+                ref={messageContainerRef}
+                className="flex-1 overflow-y-auto space-y-4 max-w-3xl p-4"
+              >
                 {messages.map((message, index) => (
                   <div
                     key={index}
@@ -247,15 +275,23 @@ export default function SearchPage() {
                 ))}
 
                 {isTyping && (
-                  <div className="p-4 bg-gray-100 text-gray-900 mr-auto rounded-lg flex items-center gap-2">
+                  <div
+                    ref={typingIndicatorRef}
+                    className="p-4 bg-gray-100 text-gray-900 mr-auto rounded-lg flex items-center gap-2"
+                  >
                     <span className="animate-pulse">Retrieving PID</span>
                     <LoadingSvg />
                   </div>
                 )}
+                {/* Spacer div to maintain gap */}
+                <div className="h-20 w-full"></div>
               </div>
 
               {/* Fixed input box at the bottom */}
-              <div className="mt-4 sticky bottom-0 bg-white w-full p-4">
+              <div className="mt-4 sticky bottom-0 bg-white w-full p-4 space-y-3">
+                <SuggestionList
+                  onSelect={(question) => onSubmit(question, () => {})}
+                />
                 {messageLoading ? (
                   // Show loading indicator for input field
                   <div className="flex justify-center items-center p-4 rounded-lg bg-gray-100 text-gray-900 animate-pulse">
