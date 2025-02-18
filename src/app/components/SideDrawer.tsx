@@ -60,6 +60,45 @@ function SideDrawer({
     }
   };
 
+  const handleAllDeleteChat = async () => {
+    if (session && session.user) {
+      try {
+        await httpService.delete(`conversation/all-chats`, {
+          headers: {
+            Authorization: `Bearer ${
+              session && session.user ? session.user.access_token : ""
+            }`,
+          },
+        });
+
+        setConversationState({
+          messages: [],
+          conversationId: "",
+          messageLoading: false,
+          isLoadingRequest: false,
+        });
+        router.replace("/");
+
+        fetchChatList();
+        toast.success("All Chats deleted");
+      } catch (error) {
+        console.error("Failed to delete all chat:", error);
+        toast.error("Failed to delete all chat");
+      }
+    }
+  };
+
+  const handleClickSystemInstruction = () => {
+    setOpen(false);
+    setConversationState({
+      messages: [],
+      conversationId: "",
+      messageLoading: false,
+      isLoadingRequest: false,
+    });
+    router.push("/admin");
+  };
+
   return (
     <Drawer.Root direction="right" open={open} onOpenChange={setOpen}>
       <div className="relative">
@@ -73,18 +112,27 @@ function SideDrawer({
             <div className="p-3 xl:p-5 space-y-4 w-full flex-1 flex flex-col justify-between gap-4">
               <div className="space-y-4">
                 <div className="flex justify-between items-center gap-2">
-                  <div
-                    className="cursor-pointer"
-                    onClick={() => setOpen(!open)}
-                  >
-                    <Image
-                      src="/images/cross.svg"
-                      alt="arrow"
-                      width={18}
-                      height={18}
-                    />
+                  <div className="flex justify-start items-end gap-4">
+                    <div
+                      className="cursor-pointer"
+                      onClick={() => setOpen(!open)}
+                    >
+                      <Image
+                        src="/images/cross.svg"
+                        alt="arrow"
+                        width={18}
+                        height={18}
+                      />
+                    </div>
+                    {chatList?.length > 0 && (
+                      <div
+                        className="text-xs hover:text-red-500 cursor-pointer"
+                        onClick={handleAllDeleteChat}
+                      >
+                        Clear all
+                      </div>
+                    )}
                   </div>
-
                   <Drawer.Title className="w-[50px] h-[47px] grid place-content-center bg-black text-white rounded-full">
                     {getInitials(session.user.name)}
                   </Drawer.Title>
@@ -129,9 +177,7 @@ function SideDrawer({
                   <div className="flex justify-end items-center gap-2">
                     <div
                       className="text-sm text-black cursor-pointer"
-                      onClick={() => {
-                        router.push("/admin");
-                      }}
+                      onClick={handleClickSystemInstruction}
                     >
                       System Instruction
                     </div>

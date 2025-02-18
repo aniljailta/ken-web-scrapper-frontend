@@ -8,7 +8,7 @@ import { toast } from "sonner";
 import httpService from "@/utils/httpService";
 import MarkdownText from "../components/Markdown";
 import { LoadingSvg } from "@/svg";
-import { ROLE_TYPE } from "@/utils/constant";
+import { ADMIN_USER_VALUES, OPENAI_MODELS, ROLE_TYPE } from "@/utils/constant";
 
 function AdminPage() {
   const { data: session, status } = useSession();
@@ -16,6 +16,8 @@ function AdminPage() {
   const [content, setContent] = useState<string>("");
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string>("");
+
+  const [selectedModel, setSelectedModel] = useState<string>("gpt-3.5-turbo");
 
   const [isTestingMode, setIsTestingMode] = useState<boolean>(false);
   const [isTyping, setIsTyping] = useState<boolean>(false);
@@ -35,7 +37,7 @@ function AdminPage() {
     try {
       const response = await httpService.post(
         "users/user-values-by-name",
-        { name: "ai_prompt" },
+        { name: ADMIN_USER_VALUES.AI_PROMPT },
         {
           headers: {
             Authorization: `Bearer ${
@@ -55,6 +57,30 @@ function AdminPage() {
     }
   };
 
+  const fetchGptModal = async () => {
+    try {
+      const response = await httpService.post(
+        "users/user-values-by-name",
+        { name: ADMIN_USER_VALUES.GPT_MODAL },
+        {
+          headers: {
+            Authorization: `Bearer ${
+              session ? session?.user?.access_token : ""
+            }`,
+          },
+        }
+      );
+
+      const data = await response.data;
+
+      setSelectedModel(data.text);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "An error occurred");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   const submitInstruction = async () => {
     if (
       session?.user?.access_token &&
@@ -64,7 +90,7 @@ function AdminPage() {
       try {
         const response = await httpService.post(
           "users/update-user-value",
-          { name: "ai_prompt", text: content },
+          { name: ADMIN_USER_VALUES.AI_PROMPT, text: content },
           {
             headers: {
               Authorization: `Bearer ${session?.user?.access_token}`,
@@ -93,11 +119,47 @@ function AdminPage() {
   useEffect(() => {
     if (session?.user?.role === "admin") {
       fetchContent();
+      fetchGptModal();
     }
   }, [session]);
 
   const handleChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     setContent(e.target.value);
+  };
+
+  const updateGptModal = async (modalName: string) => {
+    if (
+      session?.user?.access_token &&
+      content &&
+      session?.user?.role === "admin"
+    ) {
+      try {
+        const response = await httpService.post(
+          "users/update-user-value",
+          { name: ADMIN_USER_VALUES.GPT_MODAL, text: modalName },
+          {
+            headers: {
+              Authorization: `Bearer ${session?.user?.access_token}`,
+            },
+          }
+        );
+        if (!response.data) throw new Error("Saved unsuccessful ");
+
+        fetchGptModal();
+        toast.success("Save successful");
+      } catch (err) {
+        setError(err instanceof Error ? err.message : "An error occurred");
+        toast.error(err instanceof Error ? err.message : "An error occurred");
+      } finally {
+        setIsLoading(false);
+      }
+    }
+  };
+
+  const handleChangeGptModal = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const newModel = e.target.value;
+    setSelectedModel(newModel);
+    updateGptModal(newModel); // Update backend when selection changes
   };
 
   const onSubmit = async (productQuestion: string, reset: () => void) => {
@@ -259,9 +321,6 @@ function AdminPage() {
                 </div>
                 {isTestingMode && (
                   <div className="flex flex-row items-center gap-4">
-                    <p className="cursor-pointer" onClick={submitInstruction}>
-                      Save
-                    </p>
                     <p
                       className="min-w-24 px-4 py-3 bg-black text-white rounded-[10px] cursor-pointer"
                       onClick={publishInstruction}
@@ -273,8 +332,26 @@ function AdminPage() {
               </div>
 
               <div className="text-black p-4 flex flex-row items-center gap-2">
-                <span className="font-medium">Modal:</span>{" "}
-                {process.env.NEXT_PUBLIC_AI_ASSISTANT_MODAL}
+                {!isTestingMode ? (
+                  <>
+                    <span className="font-medium">Modal:</span> {selectedModel}{" "}
+                  </>
+                ) : (
+                  <>
+                    <span className="font-medium">Modal:</span>{" "}
+                    <select
+                      value={selectedModel}
+                      onChange={handleChangeGptModal}
+                      className="p-2 border rounded-md"
+                    >
+                      {OPENAI_MODELS.map((model) => (
+                        <option key={model.name} value={model.name}>
+                          {model.name}
+                        </option>
+                      ))}
+                    </select>
+                  </>
+                )}
               </div>
             </div>
           </div>
