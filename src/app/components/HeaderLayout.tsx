@@ -6,6 +6,7 @@ import { Conversation } from "../types";
 import httpService from "@/utils/httpService";
 import SideDrawer from "./SideDrawer";
 import { getInitials } from "@/utils/helper";
+import { useConversation } from "@/providers/ConversationProvider";
 
 export default function HeaderLayout({
   children,
@@ -14,7 +15,7 @@ export default function HeaderLayout({
 }) {
   const { data: session } = useSession();
   const router = useRouter();
-
+  const { setConversationState } = useConversation();
   const [open, setOpen] = useState<boolean>(false);
   const [chatList, setChatList] = useState<Conversation[]>([]);
 
@@ -52,7 +53,17 @@ export default function HeaderLayout({
         <div className="max-w-7xl mx-auto px-4 py-6">
           {/* Desktop View */}
           <div className="hidden md:flex justify-between items-center gap-2">
-            <Link href={"/"} passHref>
+            <Link
+              href={"/"}
+              passHref
+              onClick={() =>
+                setConversationState((prev) => ({
+                  ...prev,
+                  conversationId: "",
+                  messages: [],
+                }))
+              }
+            >
               <p className="text-base font-normal text-black max-w-24">
                 Great Migration
               </p>
@@ -93,7 +104,17 @@ export default function HeaderLayout({
             )}
 
             {/* Centered Site Name */}
-            <Link href={"/"} passHref>
+            <Link
+              href={"/"}
+              passHref
+              onClick={() =>
+                setConversationState((prev) => ({
+                  ...prev,
+                  conversationId: "",
+                  messages: [],
+                }))
+              }
+            >
               <p className="text-base font-medium text-black">GM</p>
             </Link>
 

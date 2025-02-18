@@ -46,19 +46,22 @@ export default function Home() {
       );
 
       const responseData = await res.data;
+
       setIsTyping(false);
       reset(); // Reset form after submission
 
       if (responseData.data) {
         // Simulate the typing effect
         simulateTypingEffect(responseData.data, () => {
-          // Perform the redirect only after the typing effect finishes
-          router.push(`/search/${responseData?.conversationId}`);
+          if (responseData?.conversationId) {
+            // Perform the redirect only after the typing effect finishes
+            router.push(`/search/${responseData?.conversationId}`);
+          }
 
           // Set the conversationId after redirect
           setConversationState((prev) => ({
             ...prev,
-            conversationId: responseData?.conversationId,
+            conversationId: responseData?.conversationId || "",
           }));
         });
       } else {
