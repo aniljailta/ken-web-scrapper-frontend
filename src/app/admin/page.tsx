@@ -14,7 +14,7 @@ function AdminPage() {
   const { data: session, status } = useSession();
   const router = useRouter();
   const [content, setContent] = useState<string>("");
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
   const [error, setError] = useState<string>("");
 
   const [selectedModel, setSelectedModel] = useState<string>("gpt-3.5-turbo");

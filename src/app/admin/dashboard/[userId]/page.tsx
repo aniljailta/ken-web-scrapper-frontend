@@ -14,7 +14,7 @@ function AdminUserChatPage() {
   const { data: session, status } = useSession();
   const router = useRouter();
   const [conversationList, setConversationList] = useState<Conversation[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
   const [error, setError] = useState<string>("");
 
   const params = useParams();
@@ -55,7 +55,7 @@ function AdminUserChatPage() {
     if (session?.user?.role === "admin" && queryUserId) {
       fetchUserReports();
     }
-  }, [session]);
+  }, [session, queryUserId]);
 
   // Show loading state
   if (status === "loading" || isLoading) {
@@ -80,7 +80,7 @@ function AdminUserChatPage() {
     return null;
   }
 
-  const userHeaders = ["Query title", "User Name", "Date", "Messages"];
+  const userHeaders = ["User Name", "Product report", "Date", "Messages"];
 
   return (
     <div className="container mx-auto flex flex-col">
