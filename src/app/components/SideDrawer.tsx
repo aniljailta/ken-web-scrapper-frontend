@@ -99,6 +99,17 @@ function SideDrawer({
     router.push("/admin");
   };
 
+  const handleClickDashboard = () => {
+    setOpen(false);
+    setConversationState({
+      messages: [],
+      conversationId: "",
+      messageLoading: false,
+      isLoadingRequest: false,
+    });
+    router.push("/admin/dashboard");
+  };
+
   return (
     <Drawer.Root direction="right" open={open} onOpenChange={setOpen}>
       <div className="relative">
@@ -174,14 +185,24 @@ function SideDrawer({
               </div>
               <div className="flex flex-col gap-4">
                 {session.user.role === "admin" && (
-                  <div className="flex justify-end items-center gap-2">
-                    <div
-                      className="text-sm text-black cursor-pointer"
-                      onClick={handleClickSystemInstruction}
-                    >
-                      System Instruction
+                  <>
+                    <div className="flex justify-end items-center gap-2">
+                      <div
+                        className="text-sm text-black cursor-pointer"
+                        onClick={handleClickDashboard}
+                      >
+                        Dashboard
+                      </div>
+                    </div>{" "}
+                    <div className="flex justify-end items-center gap-2">
+                      <div
+                        className="text-sm text-black cursor-pointer"
+                        onClick={handleClickSystemInstruction}
+                      >
+                        System Instruction
+                      </div>
                     </div>
-                  </div>
+                  </>
                 )}
                 <div className="flex justify-end items-center gap-2">
                   <div
