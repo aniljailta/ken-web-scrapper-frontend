@@ -53,10 +53,7 @@ const DashboardTable = <T,>({ data, headers, columnValue }: TableProps<T>) => {
             </tr>
           ) : (
             currentRecords.map((item, index) => (
-              <tr
-                key={index}
-                className="border-t border-gray-200 hover:bg-gray-50"
-              >
+              <tr key={index} className="">
                 {headers.map((header) => (
                   <td
                     key={`${index}-${header}`}
