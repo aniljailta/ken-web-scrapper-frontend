@@ -26,7 +26,7 @@ function AdminDashboardPage() {
   const router = useRouter();
   const [adminReportsData, setAdminReportData] =
     useState<AdminReportData>(initialAdminReport);
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
   const [error, setError] = useState<string>("");
 
   useEffect(() => {

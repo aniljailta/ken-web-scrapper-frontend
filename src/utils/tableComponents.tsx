@@ -65,7 +65,7 @@ export const getConversationColumnValue = ({
   data: Conversation;
 }) => {
   switch (header) {
-    case "Query title":
+    case "Product report":
       return (
         <div className="flex justify-between gap-2">
           <p>{data.productName}</p>
@@ -73,7 +73,7 @@ export const getConversationColumnValue = ({
       );
 
     case "User Name":
-      return data.user?.name;
+      return data.user?.name || "Guest";
     case "Date":
       return formatDate(data.createdAt);
     case "Messages":
@@ -98,7 +98,7 @@ export const getConversationTableColumnValue = ({
         </div>
       );
     case "User Name":
-      return data.user.name || "";
+      return data.user.name || "Guest";
     case "Message":
       return data.messages.length || 0;
     default:
