@@ -31,11 +31,11 @@ export interface ProductData {
   productname: string;
   count: string;
   messages: Message[];
-  user: {
+  users: {
     id: string | null;
     name: string | null;
     email: string | null;
-  };
+  }[];
 }
 
 export interface AdminReportData {
