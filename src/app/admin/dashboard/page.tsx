@@ -94,7 +94,7 @@ function AdminDashboardPage() {
     "",
   ];
 
-  const conversationHeaders = ["Report", "User Name", "Message"];
+  const conversationHeaders = ["Report", "User Name", "Message", ""];
 
   return (
     <div className="container mx-auto flex flex-col">
@@ -103,7 +103,7 @@ function AdminDashboardPage() {
           <div className="mb-4">
             <h2 className="text-base font-medium text-black">Dashboard</h2>
           </div>
-          <div className="grid grid-col-1 md:grid-cols-3 lg:grid-cols-5 gap-4">
+          <div className="grid grid-col-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
             <div className="flex flex-col gap-4 items-center justify-center">
               <div className="text-2xl font-normal">
                 {adminReportsData.totalThread}{" "}
@@ -125,10 +125,10 @@ function AdminDashboardPage() {
               </div>
               <div className="text-base font-normal">Total Reports</div>
             </div>
-            <div className="flex flex-col gap-4 items-center justify-center">
+            {/* <div className="flex flex-col gap-4 items-center justify-center">
               <div className="text-2xl font-normal">00</div>
               <div className="text-base font-normal">Avg. Response Time</div>
-            </div>
+            </div> */}
             <div className="flex flex-col gap-4 items-center justify-center">
               <div className="text-2xl font-normal">
                 {adminReportsData.totalRegisterUser}/
@@ -142,6 +142,7 @@ function AdminDashboardPage() {
               data={adminReportsData.userList}
               headers={userHeaders}
               columnValue={getUserTableColumnValue}
+              session={session}
             />
           </div>
 
@@ -150,6 +151,7 @@ function AdminDashboardPage() {
               data={adminReportsData.conversationList}
               headers={conversationHeaders}
               columnValue={getConversationTableColumnValue}
+              session={session}
             />
           </div>
         </div>
