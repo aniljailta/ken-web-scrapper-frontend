@@ -1,12 +1,23 @@
+import { Session } from "next-auth";
 import { useState } from "react";
 
 interface TableProps<T> {
   data: T[];
   headers: string[];
-  columnValue: (params: { header: string; data: T }) => React.ReactNode;
+  columnValue: (params: {
+    header: string;
+    data: T;
+    session?: Session;
+  }) => React.ReactNode;
+  session?: Session;
 }
 
-const DashboardTable = <T,>({ data, headers, columnValue }: TableProps<T>) => {
+const DashboardTable = <T,>({
+  data,
+  headers,
+  columnValue,
+  session,
+}: TableProps<T>) => {
   const [currentPage, setCurrentPage] = useState(1);
   const recordsPerPage = 20;
 
@@ -59,7 +70,7 @@ const DashboardTable = <T,>({ data, headers, columnValue }: TableProps<T>) => {
                     key={`${index}-${header}`}
                     className="py-3 px-4 text-sm text-gray-900"
                   >
-                    {columnValue({ header, data: item })}
+                    {columnValue({ header, data: item, session })}
                   </td>
                 ))}
               </tr>

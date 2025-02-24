@@ -1,7 +1,10 @@
+import ProductTableDoc from "@/app/components/PDFDocumentComponent/ProductTableDoc";
+import UserTableDoc from "@/app/components/PDFDocumentComponent/UserTableDoc";
 import { Conversation, ProductData, User } from "@/app/types";
+import { Session } from "next-auth";
 import Link from "next/link";
 
-const formatDate = (dateString: string) => {
+export const formatDate = (dateString: string) => {
   return new Date(dateString).toLocaleDateString("en-US", {
     year: "numeric",
     month: "short",
@@ -10,7 +13,7 @@ const formatDate = (dateString: string) => {
 };
 
 // Calculate total messages across all conversations
-const getTotalMessages = (conversations: Conversation[]) => {
+export const getTotalMessages = (conversations: Conversation[]) => {
   if (!conversations || !Array.isArray(conversations)) return 0;
 
   return conversations.reduce((total, conversation) => {
@@ -26,9 +29,11 @@ const getTotalMessages = (conversations: Conversation[]) => {
 export const getUserTableColumnValue = ({
   header,
   data,
+  session,
 }: {
   header: string;
   data: User;
+  session?: Session;
 }) => {
   switch (header) {
     case "Users by total queries":
@@ -53,7 +58,7 @@ export const getUserTableColumnValue = ({
     case "Tokens":
       return data.tokensUsed;
     default:
-      return "";
+      return <UserTableDoc dataId={data.id} session={session} />;
   }
 };
 
@@ -86,22 +91,28 @@ export const getConversationColumnValue = ({
 export const getConversationTableColumnValue = ({
   header,
   data,
+  session,
 }: {
   header: string;
   data: ProductData;
+  session?: Session;
 }) => {
   switch (header) {
     case "Report":
       return (
-        <div className="flex justify-between gap-2">
-          <p>{data.productname}</p> <p>{data.count || 0}</p>
-        </div>
+        <Link href={`/admin/product?productName=${data.productname}`} passHref>
+          <div className="flex justify-between gap-2 underline hover:text-blue-800">
+            <p>{data.productname}</p> <p>{data.count || 0}</p>
+          </div>
+        </Link>
       );
     case "User Name":
       return data.user.name || "Guest";
     case "Message":
       return data.messages.length || 0;
     default:
-      return "";
+      return (
+        <ProductTableDoc productName={data.productname} session={session} />
+      );
   }
 };
