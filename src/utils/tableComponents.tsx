@@ -107,7 +107,7 @@ export const getConversationTableColumnValue = ({
         </Link>
       );
     case "User Name":
-      return data.user.name || "Guest";
+      return data.users?.length ? data.users[0]?.name || "Guest" : "Guest";
     case "Message":
       return data.messages.length || 0;
     default:
