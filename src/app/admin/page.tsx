@@ -177,9 +177,17 @@ function AdminPage() {
 
       setIsTyping(true);
 
-      const res = await httpService.post("conversation/chat", {
-        question: productQuestion,
-      });
+      const res = await httpService.post(
+        "conversation/chat",
+        {
+          question: productQuestion,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${session?.user?.access_token}`,
+          },
+        }
+      );
 
       const responseData = await res.data;
       setIsTyping(false);
