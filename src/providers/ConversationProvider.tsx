@@ -7,7 +7,7 @@ type ConversationProviderProps = {
   children: React.ReactNode;
 };
 
-type Message = {
+export type Message = {
   role: string;
   content: string;
   reactionStatus?: boolean | null;
@@ -21,9 +21,16 @@ type ConversationState = {
   isLoadingRequest: boolean;
 };
 
+type AdminConversationPreviewType = {
+  open: boolean;
+  conversationId: string | null;
+}
+
 type ConversationContextType = {
   conversationState: ConversationState;
   setConversationState: React.Dispatch<React.SetStateAction<ConversationState>>;
+  adminChatPanel: AdminConversationPreviewType;
+  setAdminChatPanel: React.Dispatch<React.SetStateAction<AdminConversationPreviewType>>
   handleLogout: () => void;
 };
 
@@ -45,6 +52,13 @@ export const ConversationProvider: React.FC<ConversationProviderProps> = ({
       conversationId: queryChatId || "",
       messageLoading: false,
       isLoadingRequest: false,
+    }
+  );
+
+  const [adminChatPanel, setAdminChatPanel] = useState<AdminConversationPreviewType>(
+    {
+      open: false,
+      conversationId: null
     }
   );
 
@@ -104,7 +118,10 @@ export const ConversationProvider: React.FC<ConversationProviderProps> = ({
 
   return (
     <ConversationContext.Provider
-      value={{ conversationState, setConversationState, handleLogout }}
+      value={{
+        conversationState, setConversationState, handleLogout,
+        adminChatPanel, setAdminChatPanel
+      }}
     >
       {children}
     </ConversationContext.Provider>

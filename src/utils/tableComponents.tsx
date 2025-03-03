@@ -1,5 +1,5 @@
 import ProductTableDoc from "@/app/components/PDFDocumentComponent/ProductTableDoc";
-import UserTableDoc from "@/app/components/PDFDocumentComponent/UserTableDoc";
+import { ToggleConversationButton } from "@/app/components/ToggleConversationButton";
 import { Conversation, ProductData, User } from "@/app/types";
 import { Session } from "next-auth";
 import Link from "next/link";
@@ -29,7 +29,6 @@ export const getTotalMessages = (conversations: Conversation[]) => {
 export const getUserTableColumnValue = ({
   header,
   data,
-  session,
 }: {
   header: string;
   data: User;
@@ -57,8 +56,8 @@ export const getUserTableColumnValue = ({
       return getTotalMessages(data.conversations);
     case "Tokens":
       return data.tokensUsed;
-    default:
-      return <UserTableDoc dataId={data.id} session={session} />;
+    // default:
+    //   return <UserTableDoc dataId={data.id} session={session} />;
   }
 };
 
@@ -83,6 +82,8 @@ export const getConversationColumnValue = ({
       return formatDate(data.createdAt);
     case "Messages":
       return data.messages.length;
+    case "Action":
+      return <ToggleConversationButton conversationId={data.id} />;
     default:
       return "";
   }

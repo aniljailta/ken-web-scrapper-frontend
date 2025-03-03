@@ -9,6 +9,7 @@ import DashboardTable from "@/app/components/DashboardTable";
 import { Conversation } from "@/app/types";
 import { getConversationColumnValue } from "@/utils/tableComponents";
 import Image from "next/image";
+import { ConversationDrawer } from "@/app/components/ConversationDrawer";
 
 function AdminUserChatPage() {
   const { data: session, status } = useSession();
@@ -33,9 +34,8 @@ function AdminUserChatPage() {
         `users/conversation-by-user-id?userId=${queryUserId}`,
         {
           headers: {
-            Authorization: `Bearer ${
-              session ? session?.user?.access_token : ""
-            }`,
+            Authorization: `Bearer ${session ? session?.user?.access_token : ""
+              }`,
           },
         }
       );
@@ -80,7 +80,7 @@ function AdminUserChatPage() {
     return null;
   }
 
-  const userHeaders = ["User Name", "Product report", "Date", "Messages"];
+  const userHeaders = ["User Name", "Product report", "Date", "Messages", "Action"];
 
   return (
     <div className="container mx-auto flex flex-col">
@@ -99,6 +99,7 @@ function AdminUserChatPage() {
               headers={userHeaders}
               columnValue={getConversationColumnValue}
             />
+            <ConversationDrawer />
           </div>
         </div>
       </div>
