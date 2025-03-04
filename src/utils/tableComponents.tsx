@@ -3,6 +3,7 @@ import { ToggleConversationButton } from "@/app/components/ToggleConversationBut
 import { Conversation, ProductData, User } from "@/app/types";
 import { Session } from "next-auth";
 import Link from "next/link";
+import RemoveBetaUser from "@/app/components/RemoveBetaUser";
 
 export const formatDate = (dateString: string) => {
   return new Date(dateString).toLocaleDateString("en-US", {
@@ -61,6 +62,44 @@ export const getUserTableColumnValue = ({
   }
 };
 
+export const getInviteColumnValue = ({
+  header,
+  data,
+}: {
+  header: string;
+  data: User;
+  session?: Session;
+}) => {
+  switch (header) {
+    case "Name":
+      return (
+        <Link href={`/admin/dashboard/${data.id}`} passHref>
+          <div className="flex justify-between gap-2 underline hover:text-blue-800">
+            <p>{data.name}</p>
+          </div>
+        </Link>
+      );
+    case "Email":
+      return (
+        <Link href={`/admin/dashboard/${data.id}`} passHref>
+          <div className="flex justify-between gap-2 underline hover:text-blue-800">
+            <p>{data.email}</p>
+          </div>
+        </Link>
+      );
+    case "Created At":
+      return formatDate(data.created_date);
+    default:
+      return <div className="flex items-center justify-center gap-2">
+        {/* <button onClick={() => {
+          copyToClipboard(data.password);
+        }} className=" bg-neutral-300 text-white p-2  rounded-[10px] hover:bg-black cursor-pointer">
+          Copy Password
+        </button> */}
+        <RemoveBetaUser id={data.id} />
+      </div>;
+  }
+};
 export const getConversationColumnValue = ({
   header,
   data,

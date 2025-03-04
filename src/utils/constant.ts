@@ -1,5 +1,6 @@
 export enum ROLE_TYPE {
   USER = "user",
+  BETA = "beta",
   ASSISTANT = "assistant",
 }
 
