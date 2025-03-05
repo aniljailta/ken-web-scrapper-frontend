@@ -36,9 +36,8 @@ function SideDrawer({
       try {
         await httpService.delete(`conversation/chat/${chatId}`, {
           headers: {
-            Authorization: `Bearer ${
-              session && session.user ? session.user.access_token : ""
-            }`,
+            Authorization: `Bearer ${session && session.user ? session.user.access_token : ""
+              }`,
           },
         });
 
@@ -65,9 +64,8 @@ function SideDrawer({
       try {
         await httpService.delete(`conversation/all-chats`, {
           headers: {
-            Authorization: `Bearer ${
-              session && session.user ? session.user.access_token : ""
-            }`,
+            Authorization: `Bearer ${session && session.user ? session.user.access_token : ""
+              }`,
           },
         });
 
@@ -108,6 +106,17 @@ function SideDrawer({
       isLoadingRequest: false,
     });
     router.push("/admin/dashboard");
+  };
+
+  const handleClickBetaInvite = () => {
+    setOpen(false);
+    setConversationState({
+      messages: [],
+      conversationId: "",
+      messageLoading: false,
+      isLoadingRequest: false,
+    });
+    router.push("/admin/beta-invite");
   };
 
   return (
@@ -186,7 +195,17 @@ function SideDrawer({
               <div className="flex flex-col gap-4">
                 {session.user.role === "admin" && (
                   <>
+
                     <div className="flex justify-end items-center gap-2">
+                      <div
+                        className="text-sm text-black cursor-pointer"
+                        onClick={handleClickBetaInvite}
+                      >
+                        Beta Invite
+                      </div>
+                    </div>
+                    <div className="flex justify-end items-center gap-2">
+
                       <div
                         className="text-sm text-black cursor-pointer"
                         onClick={handleClickDashboard}

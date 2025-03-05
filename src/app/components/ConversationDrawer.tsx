@@ -141,14 +141,14 @@ export const ConversationDrawer = () => {
                                         {conversationState.messages.map((message, index) => (
                                             <div
                                                 key={index}
-                                                className={`p-4 rounded-lg break-words  text-black/75 ${message.role === ROLE_TYPE.USER
+                                                className={`p-4 rounded-lg break-words  text-black/75 ${(message.role === ROLE_TYPE.USER || message.role === ROLE_TYPE.BETA)
                                                     ? "text-xl font-normal"
                                                     : "text-base font-light"
                                                     }`}
                                             >
                                                 <MarkdownText text={message.content} />
 
-                                                {message.role !== ROLE_TYPE.USER && (
+                                                {(message.role !== ROLE_TYPE.USER && message.role !== ROLE_TYPE.BETA) && (
                                                     <div className="flex gap-8 mt-4 cursor-pointer">
 
                                                     </div>
