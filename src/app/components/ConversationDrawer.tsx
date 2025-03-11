@@ -31,7 +31,7 @@ export const ConversationDrawer = () => {
             createdAt: ''
         }
     );
-    const [isLoading, setIsLoading] = useState<boolean>(true);
+    const [isLoading, setIsLoading] = useState<boolean>(false);
     const [error, setError] = useState<string>("");
 
     const handleClose = () => {
