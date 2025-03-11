@@ -91,7 +91,7 @@ export const ConversationDrawer = () => {
             <div className="relative">
                 <Drawer.Portal>
                     <Drawer.Overlay className="fixed inset-0 bg-black/40" />
-                    <Drawer.Content className="left-[50%] -translate-x-[50%] top-0.5 bottom-2 fixed z-10 outline-none w-[800px] h-screen flex rounded-lg bg-zinc-50 border border-gray-400">
+                    <Drawer.Content className="left-[50%] -translate-x-[50%] top-0.5 bottom-2 fixed z-10 outline-none w-[800px] h-screen flex rounded-lg bg-zinc-50 border border-gray-400 !select-auto">
                         <div className="p-3 xl:p-5 space-y-4 w-full flex-1 flex flex-col justify-between gap-4">
                             <div className="space-y-4">
                                 <div className="flex justify-between items-center gap-2">
