@@ -7,9 +7,9 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { InputComponent } from "./components/InputComponent";
 import httpService from "@/utils/httpService";
-import MarkdownText from "./components/Markdown";
 import { LoadingSvg } from "@/svg";
 import { ROLE_TYPE } from "@/utils/constant";
+import { MessageList } from "./components/Chat/MessageList";
 
 export default function Home() {
   const { data: sessionUser } = useSession();
@@ -141,15 +141,7 @@ export default function Home() {
         {messages.length > 0 && (
           <div className="flex flex-col h-full">
             <div className="flex-1 space-y-4 max-w-3xl">
-              {messages.map((message, index) => (
-                <div
-                  key={index}
-                  className={`p-4 rounded-lg break-words text-base font-light text-black/75`}
-                >
-                  <MarkdownText text={message.content} />
-                </div>
-              ))}
-
+              <MessageList data={messages} />
               {isTyping && (
                 <div className="p-4 bg-gray-100 text-gray-900 mr-auto rounded-lg flex items-center gap-2">
                   <span className="animate-pulse">Retrieving PID</span>

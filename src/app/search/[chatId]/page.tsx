@@ -3,17 +3,15 @@
 import { useConversation } from "@/providers/ConversationProvider";
 import { useSession } from "next-auth/react";
 
-import { RefObject, useRef, useState } from "react";
+import { useRef, useState } from "react";
 import { InputComponent } from "../../components/InputComponent";
 
 import Link from "next/link";
 import httpService from "@/utils/httpService";
-import MarkdownText from "@/app/components/Markdown";
-import { LoadingSvg, PencilSvg, ThumbsDown, ThumbsUp } from "@/svg";
+import { LoadingSvg, PencilSvg } from "@/svg";
 import { ROLE_TYPE } from "@/utils/constant";
-import { useScrollMessages } from "@/app/hooks/useScrollMessages";
 import SuggestionList from "@/app/components/SuggestionList";
-import { ReportChat } from "@/app/components/ReportChat";
+import { MessageList } from "@/app/components/Chat/MessageList";
 
 export default function SearchPage() {
   const { data: sessionUser } = useSession();
@@ -26,12 +24,12 @@ export default function SearchPage() {
   const messageContainerRef = useRef<HTMLDivElement>(null);
   const typingIndicatorRef = useRef<HTMLDivElement>(null);
 
-  const { scrollToLastMessage } = useScrollMessages({
-    messageContainerRef: messageContainerRef as RefObject<HTMLDivElement>,
-    typingIndicatorRef: typingIndicatorRef as RefObject<HTMLDivElement>,
-    messages,
-    isTyping,
-  });
+  // const { scrollToLastMessage } = useScrollMessages({
+  //   messageContainerRef: messageContainerRef as RefObject<HTMLDivElement>,
+  //   typingIndicatorRef: typingIndicatorRef as RefObject<HTMLDivElement>,
+  //   messages,
+  //   isTyping,
+  // });
 
   const onSubmit = async (productQuestion: string, reset: () => void) => {
     if (!productQuestion || isLoadingRequest) return;
@@ -52,7 +50,7 @@ export default function SearchPage() {
       }));
 
       // Scroll after adding user message
-      scrollToLastMessage();
+      // scrollToLastMessage();
 
       setIsTyping(true);
 
@@ -141,10 +139,6 @@ export default function SearchPage() {
         ),
       }));
 
-      // Scroll after each character is added
-      requestAnimationFrame(() => {
-        scrollToLastMessage();
-      });
 
       index++;
 
@@ -153,6 +147,7 @@ export default function SearchPage() {
       }
     }, 20);
   };
+
 
   const handleReaction = async ({
     messageId,
@@ -192,7 +187,6 @@ export default function SearchPage() {
       }
     }
   };
-
   return (
     <div className="flex flex-col min-h-[78vh] items-center justify-between">
       <div className="flex flex-col w-full max-w-xl flex-1">
@@ -230,53 +224,7 @@ export default function SearchPage() {
                 ref={messageContainerRef}
                 className="flex-1 overflow-y-auto space-y-4 max-w-3xl p-4"
               >
-                {messages.map((message, index) => (
-                  <div
-                    key={index}
-                    className={`p-4 rounded-lg break-words  text-black/75 ${message.role === ROLE_TYPE.USER
-                      ? "text-xl font-normal"
-                      : "text-base font-light"
-                      }`}
-                  >
-                    <MarkdownText text={message.content} />
-                    {message.role !== ROLE_TYPE.USER && (
-                      <div className="flex gap-4 mt-4 items-center justify-start">
-                        <div className="flex gap-8 cursor-pointer">
-                          {/* Like Button */}
-                          <div
-                            onClick={() =>
-                              handleReaction({
-                                messageId: message?.id || "",
-                                newStatus:
-                                  message.reactionStatus === true ? null : true,
-                              })
-                            }
-                          >
-                            <ThumbsUp
-                              isActive={Boolean(message.reactionStatus)}
-                            />
-                          </div>
-
-                          {/* Dislike Button */}
-                          <div
-                            onClick={() =>
-                              handleReaction({
-                                messageId: message?.id || "",
-                                newStatus:
-                                  message.reactionStatus === false ? null : false,
-                              })
-                            }
-                          >
-                            <ThumbsDown
-                              isActive={message.reactionStatus === false}
-                            />
-                          </div>
-                        </div>
-                        <ReportChat isFlag={message.isFlag} messageId={message?.id || ''} />
-                      </div>
-                    )}
-                  </div>
-                ))}
+                <MessageList handleReaction={handleReaction} data={messages} />
 
                 {isTyping && (
                   <div

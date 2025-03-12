@@ -6,10 +6,8 @@ import httpService from '@/utils/httpService';
 import { useSession } from 'next-auth/react';
 import { useEffect, useState } from 'react';
 import { LoadingSvg } from '@/svg';
-import MarkdownText from './Markdown';
-import { ROLE_TYPE } from '@/utils/constant';
 import { formatDate } from '@/utils/tableComponents';
-import { ReportIcon } from '@/svg/Report';
+import { MessageList } from './Chat/MessageList';
 
 export type ConversationState = {
     messages: Message[];
@@ -139,28 +137,9 @@ export const ConversationDrawer = () => {
                                         // ref={messageContainerRef}
                                         className="flex-1 overflow-y-auto space-y-4 max-w-3xl p-4"
                                     >
-                                        {conversationState.messages.map((message, index) => (
-                                            <div
-                                                key={index}
-                                                className={`p-4 rounded-lg break-words  text-black/75 ${(message.role === ROLE_TYPE.USER || message.role === ROLE_TYPE.BETA)
-                                                    ? "text-xl font-normal"
-                                                    : "text-base font-light"
-                                                    }`}
-                                            >
-                                                <MarkdownText text={message.content} />
-                                                {
-                                                    message.isFlag &&
-                                                    <div className="mt-2">
-                                                        <ReportIcon isActive={message.isFlag} />
-                                                    </div>
-                                                }
-                                                {(message.role !== ROLE_TYPE.USER && message.role !== ROLE_TYPE.BETA) && (
-                                                    <div className="flex gap-8 mt-4 cursor-pointer">
-
-                                                    </div>
-                                                )}
-                                            </div>
-                                        ))}
+                                        {
+                                            <MessageList data={conversationState.messages} />
+                                        }
                                         {/* Spacer div to maintain gap */}
                                         <div className="h-20 w-full"></div>
                                     </div>

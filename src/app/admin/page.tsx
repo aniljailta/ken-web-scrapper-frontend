@@ -6,9 +6,9 @@ import { InputComponent } from "../components/InputComponent";
 import { useConversation } from "@/providers/ConversationProvider";
 import { toast } from "sonner";
 import httpService from "@/utils/httpService";
-import MarkdownText from "../components/Markdown";
 import { LoadingSvg } from "@/svg";
 import { ADMIN_USER_VALUES, OPENAI_MODELS, ROLE_TYPE } from "@/utils/constant";
+import { MessageList } from "../components/Chat/MessageList";
 
 function AdminPage() {
   const { data: session, status } = useSession();
@@ -367,15 +367,7 @@ function AdminPage() {
               <div className="flex flex-col h-full justify-between flex-1">
                 {/* Message area with scroll */}
                 <div className="flex-1 overflow-y-auto space-y-4 max-w-3xl p-4">
-                  {messages.map((message, index) => (
-                    <div
-                      key={index}
-                      className="p-4 rounded-lg break-words text-base font-light text-black/75"
-                    >
-                      <MarkdownText text={message.content} />
-                    </div>
-                  ))}
-
+                  <MessageList data={messages} />
                   {isTyping && (
                     <div className="p-4 bg-gray-100 text-gray-900 mr-auto rounded-lg flex gap-2">
                       <span className="animate-pulse">Retrieving PID</span>

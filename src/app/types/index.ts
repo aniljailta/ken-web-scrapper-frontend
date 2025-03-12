@@ -14,6 +14,7 @@ export interface Message {
   role: string;
   conversationId: string;
   createdAt: string;
+  isFlag: boolean;
   reactionStatus?: boolean | null;
 }
 
