@@ -13,6 +13,7 @@ import { LoadingSvg, PencilSvg, ThumbsDown, ThumbsUp } from "@/svg";
 import { ROLE_TYPE } from "@/utils/constant";
 import { useScrollMessages } from "@/app/hooks/useScrollMessages";
 import SuggestionList from "@/app/components/SuggestionList";
+import { ReportChat } from "@/app/components/ReportChat";
 
 export default function SearchPage() {
   const { data: sessionUser } = useSession();
@@ -44,6 +45,7 @@ export default function SearchPage() {
             role: ROLE_TYPE.USER,
             content: productQuestion,
             reactionStatus: null,
+            isFlag: false
           },
         ],
         isLoadingRequest: true,
@@ -59,9 +61,8 @@ export default function SearchPage() {
         { question: productQuestion, conversationId },
         {
           headers: {
-            Authorization: `Bearer ${
-              sessionUser ? sessionUser.user.access_token : ""
-            }`,
+            Authorization: `Bearer ${sessionUser ? sessionUser.user.access_token : ""
+              }`,
           },
         }
       );
@@ -85,6 +86,7 @@ export default function SearchPage() {
               role: ROLE_TYPE.ASSISTANT,
               content: responseData.message || "No response received",
               reactionStatus: responseData.reactionStatus || null,
+              isFlag: false
             },
           ],
         }));
@@ -100,6 +102,8 @@ export default function SearchPage() {
             role: ROLE_TYPE.ASSISTANT,
             content: "Something went wrong.",
             reactionStatus: null,
+            isFlag: false,
+
           },
         ],
       }));
@@ -119,7 +123,7 @@ export default function SearchPage() {
       ...prev,
       messages: [
         ...prev.messages,
-        { role: ROLE_TYPE.ASSISTANT, content: "", reactionStatus: null },
+        { role: ROLE_TYPE.ASSISTANT, content: "", reactionStatus: null, isFlag: false },
       ],
     }));
 
@@ -129,10 +133,10 @@ export default function SearchPage() {
         messages: prev.messages.map((msg, i) =>
           i === prev.messages.length - 1 && msg.role === ROLE_TYPE.ASSISTANT
             ? {
-                ...msg,
-                content: msg.content + response[index - 1],
-                ...(messageId && { id: messageId }),
-              }
+              ...msg,
+              content: msg.content + response[index - 1],
+              ...(messageId && { id: messageId }),
+            }
             : msg
         ),
       }));
@@ -170,9 +174,8 @@ export default function SearchPage() {
           { messageId, reactionStatus: newStatus },
           {
             headers: {
-              Authorization: `Bearer ${
-                sessionUser ? sessionUser.user.access_token : ""
-              }`,
+              Authorization: `Bearer ${sessionUser ? sessionUser.user.access_token : ""
+                }`,
             },
           }
         );
@@ -230,45 +233,46 @@ export default function SearchPage() {
                 {messages.map((message, index) => (
                   <div
                     key={index}
-                    className={`p-4 rounded-lg break-words  text-black/75 ${
-                      message.role === ROLE_TYPE.USER
-                        ? "text-xl font-normal"
-                        : "text-base font-light"
-                    }`}
+                    className={`p-4 rounded-lg break-words  text-black/75 ${message.role === ROLE_TYPE.USER
+                      ? "text-xl font-normal"
+                      : "text-base font-light"
+                      }`}
                   >
                     <MarkdownText text={message.content} />
-
                     {message.role !== ROLE_TYPE.USER && (
-                      <div className="flex gap-8 mt-4 cursor-pointer">
-                        {/* Like Button */}
-                        <div
-                          onClick={() =>
-                            handleReaction({
-                              messageId: message?.id || "",
-                              newStatus:
-                                message.reactionStatus === true ? null : true,
-                            })
-                          }
-                        >
-                          <ThumbsUp
-                            isActive={Boolean(message.reactionStatus)}
-                          />
-                        </div>
+                      <div className="flex gap-4 mt-4 items-center justify-start">
+                        <div className="flex gap-8 cursor-pointer">
+                          {/* Like Button */}
+                          <div
+                            onClick={() =>
+                              handleReaction({
+                                messageId: message?.id || "",
+                                newStatus:
+                                  message.reactionStatus === true ? null : true,
+                              })
+                            }
+                          >
+                            <ThumbsUp
+                              isActive={Boolean(message.reactionStatus)}
+                            />
+                          </div>
 
-                        {/* Dislike Button */}
-                        <div
-                          onClick={() =>
-                            handleReaction({
-                              messageId: message?.id || "",
-                              newStatus:
-                                message.reactionStatus === false ? null : false,
-                            })
-                          }
-                        >
-                          <ThumbsDown
-                            isActive={message.reactionStatus === false}
-                          />
+                          {/* Dislike Button */}
+                          <div
+                            onClick={() =>
+                              handleReaction({
+                                messageId: message?.id || "",
+                                newStatus:
+                                  message.reactionStatus === false ? null : false,
+                              })
+                            }
+                          >
+                            <ThumbsDown
+                              isActive={message.reactionStatus === false}
+                            />
+                          </div>
                         </div>
+                        <ReportChat isFlag={message.isFlag} messageId={message?.id || ''} />
                       </div>
                     )}
                   </div>
@@ -290,7 +294,7 @@ export default function SearchPage() {
               {/* Fixed input box at the bottom */}
               <div className="mt-4 sticky bottom-0 bg-white w-full p-4 space-y-3">
                 <SuggestionList
-                  onSelect={(question) => onSubmit(question, () => {})}
+                  onSelect={(question) => onSubmit(question, () => { })}
                 />
                 {messageLoading ? (
                   // Show loading indicator for input field

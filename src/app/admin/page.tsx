@@ -40,9 +40,8 @@ function AdminPage() {
         { name: ADMIN_USER_VALUES.AI_PROMPT },
         {
           headers: {
-            Authorization: `Bearer ${
-              session ? session?.user?.access_token : ""
-            }`,
+            Authorization: `Bearer ${session ? session?.user?.access_token : ""
+              }`,
           },
         }
       );
@@ -64,9 +63,8 @@ function AdminPage() {
         { name: ADMIN_USER_VALUES.GPT_MODAL },
         {
           headers: {
-            Authorization: `Bearer ${
-              session ? session?.user?.access_token : ""
-            }`,
+            Authorization: `Bearer ${session ? session?.user?.access_token : ""
+              }`,
           },
         }
       );
@@ -170,7 +168,7 @@ function AdminPage() {
         ...prev,
         messages: [
           ...prev.messages,
-          { role: ROLE_TYPE.USER, content: productQuestion },
+          { role: ROLE_TYPE.USER, content: productQuestion, isFlag: false },
         ],
         isLoadingRequest: true,
       }));
@@ -207,6 +205,7 @@ function AdminPage() {
             {
               role: ROLE_TYPE.ASSISTANT,
               content: responseData.message || "No response received",
+              isFlag: false
             },
           ],
         }));
@@ -218,7 +217,7 @@ function AdminPage() {
         ...prev,
         messages: [
           ...prev.messages,
-          { role: ROLE_TYPE.ASSISTANT, content: "Something went wrong." },
+          { role: ROLE_TYPE.ASSISTANT, content: "Something went wrong.", isFlag: false },
         ],
       }));
     } finally {
@@ -235,7 +234,7 @@ function AdminPage() {
 
     setConversationState((prev) => ({
       ...prev,
-      messages: [...prev.messages, { role: ROLE_TYPE.ASSISTANT, content: "" }],
+      messages: [...prev.messages, { role: ROLE_TYPE.ASSISTANT, content: "", isFlag: false }],
     }));
 
     const typingInterval = setInterval(() => {
@@ -311,17 +310,15 @@ function AdminPage() {
               <div className="flex justify-between gap-2">
                 <div className="flex flex-row items-center">
                   <p
-                    className={`p-4 ${
-                      !isTestingMode ? "text-black" : "text-neutral-500"
-                    } font-medium text-base cursor-pointer`}
+                    className={`p-4 ${!isTestingMode ? "text-black" : "text-neutral-500"
+                      } font-medium text-base cursor-pointer`}
                     onClick={() => setIsTestingMode(false)}
                   >
                     Live
                   </p>
                   <p
-                    className={`p-4 ${
-                      isTestingMode ? "text-black" : "text-neutral-500"
-                    } font-medium text-base cursor-pointer`}
+                    className={`p-4 ${isTestingMode ? "text-black" : "text-neutral-500"
+                      } font-medium text-base cursor-pointer`}
                     onClick={() => setIsTestingMode(true)}
                   >
                     Testing

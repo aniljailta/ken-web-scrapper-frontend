@@ -1,6 +1,6 @@
 import ProductTableDoc from "@/app/components/PDFDocumentComponent/ProductTableDoc";
 import { ToggleConversationButton } from "@/app/components/ToggleConversationButton";
-import { Conversation, ProductData, User } from "@/app/types";
+import { Conversation, FlaggedData, ProductData, User } from "@/app/types";
 import { Session } from "next-auth";
 import Link from "next/link";
 import RemoveBetaUser from "@/app/components/RemoveBetaUser";
@@ -153,6 +153,41 @@ export const getConversationTableColumnValue = ({
     default:
       return (
         <ProductTableDoc productName={data.productname} session={session} />
+      );
+  }
+};
+
+export const getFlaggedMessagesColumnValue = ({
+  header,
+  data,
+  session,
+}: {
+  header: string;
+  data: FlaggedData;
+  session?: Session;
+}) => {
+  switch (header) {
+    case "User":
+      return (
+        <Link href={`/admin/dashboard/${encodeURIComponent(data.conversation.user?.id || '')}`} passHref>
+          <div className="flex justify-between gap-2 underline hover:text-blue-800">
+            {data.conversation.user?.name}
+          </div>
+        </Link>
+      );
+    case "Report":
+      return <Link href={`/admin/product?productName=${data.conversation.productName}`} passHref>
+        <div className="flex justify-between gap-2 underline hover:text-blue-800">
+          {data.conversation.productName}
+        </div>
+      </Link>
+    case "Message":
+      return 'Message Here';
+    case "Action":
+      return <ToggleConversationButton conversationId={data.conversationId} />;
+    default:
+      return (
+        <ProductTableDoc productName={data?.conversation?.productName || ''} session={session} />
       );
   }
 };

@@ -11,6 +11,8 @@ import {
   getConversationTableColumnValue,
   getUserTableColumnValue,
 } from "@/utils/tableComponents";
+import { FlaggedMessagesTable } from "@/app/components/FlaggedMessagesTable";
+import { ReportIcon } from "@/svg/Report";
 
 const initialAdminReport = {
   totalChat: 0,
@@ -114,7 +116,7 @@ function AdminDashboardPage() {
               <div className="text-2xl font-normal">
                 {Number(
                   adminReportsData.totalChat /
-                    adminReportsData.totalRegisterUser
+                  adminReportsData.totalRegisterUser
                 ).toFixed(3)}
               </div>
               <div className="text-base font-normal">Avg. Queries</div>
@@ -153,6 +155,15 @@ function AdminDashboardPage() {
               columnValue={getConversationTableColumnValue}
               session={session}
             />
+          </div>
+          <div className="my-4 space-y-4 lg:my-8">
+            <div className="flex items-center justify-start gap-2">
+              <h2 className="text-base font-medium text-black">
+                Reported Messages
+              </h2>
+              <ReportIcon isActive={false} />
+            </div>
+            <FlaggedMessagesTable />
           </div>
         </div>
       </div>

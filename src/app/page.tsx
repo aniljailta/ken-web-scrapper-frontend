@@ -26,7 +26,7 @@ export default function Home() {
         ...prev,
         messages: [
           ...prev.messages,
-          { role: ROLE_TYPE.USER, content: productQuestion },
+          { role: ROLE_TYPE.USER, content: productQuestion, isFlag: false },
         ],
         isLoadingRequest: true,
       }));
@@ -38,9 +38,8 @@ export default function Home() {
         { question: productQuestion },
         {
           headers: {
-            Authorization: `Bearer ${
-              sessionUser ? sessionUser.user.access_token : ""
-            }`,
+            Authorization: `Bearer ${sessionUser ? sessionUser.user.access_token : ""
+              }`,
           },
         }
       );
@@ -72,6 +71,7 @@ export default function Home() {
             {
               role: ROLE_TYPE.ASSISTANT,
               content: responseData.message || "No response received",
+              isFlag: false
             },
           ],
         }));
@@ -82,7 +82,7 @@ export default function Home() {
         ...prev,
         messages: [
           ...prev.messages,
-          { role: ROLE_TYPE.ASSISTANT, content: "Something went wrong." },
+          { role: ROLE_TYPE.ASSISTANT, content: "Something went wrong.", isFlag: false },
         ],
       }));
     } finally {
@@ -100,7 +100,7 @@ export default function Home() {
     // Add an empty message for the typing effect
     setConversationState((prev) => ({
       ...prev,
-      messages: [...prev.messages, { role: ROLE_TYPE.ASSISTANT, content: "" }],
+      messages: [...prev.messages, { role: ROLE_TYPE.ASSISTANT, content: "", isFlag: false }],
     }));
 
     const typingInterval = setInterval(() => {

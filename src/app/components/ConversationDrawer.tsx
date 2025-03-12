@@ -9,6 +9,7 @@ import { LoadingSvg } from '@/svg';
 import MarkdownText from './Markdown';
 import { ROLE_TYPE } from '@/utils/constant';
 import { formatDate } from '@/utils/tableComponents';
+import { ReportIcon } from '@/svg/Report';
 
 export type ConversationState = {
     messages: Message[];
@@ -147,7 +148,12 @@ export const ConversationDrawer = () => {
                                                     }`}
                                             >
                                                 <MarkdownText text={message.content} />
-
+                                                {
+                                                    message.isFlag &&
+                                                    <div className="mt-2">
+                                                        <ReportIcon isActive={message.isFlag} />
+                                                    </div>
+                                                }
                                                 {(message.role !== ROLE_TYPE.USER && message.role !== ROLE_TYPE.BETA) && (
                                                     <div className="flex gap-8 mt-4 cursor-pointer">
 

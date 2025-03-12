@@ -46,3 +46,14 @@ export interface AdminReportData {
   userList: User[];
   conversationList: ProductData[];
 }
+
+export interface FlaggedData {
+  id: string;
+  content: string;
+  role: string;
+  conversationId: string;
+  isFlag: boolean;
+  createdAt: Date;
+  reactionStatus: null;
+  conversation: Conversation;
+}

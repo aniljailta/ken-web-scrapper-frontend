@@ -10,6 +10,7 @@ type ConversationProviderProps = {
 export type Message = {
   role: string;
   content: string;
+  isFlag: boolean;
   reactionStatus?: boolean | null;
   id?: string;
 };
