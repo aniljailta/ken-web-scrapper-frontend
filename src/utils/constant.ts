@@ -32,10 +32,6 @@ export const OPENAI_MODELS: ModelInfo[] = [
     name: "gpt-3.5-turbo-16k",
     maxTokens: 16384,
   },
-  {
-    name: "dall-e-3",
-    maxTokens: 4096,
-  },
 ];
 
 export const ADMIN_USER_VALUES = {
@@ -43,3 +39,14 @@ export const ADMIN_USER_VALUES = {
   GPT_MODAL: "gpt_modal",
   FREE_REQUEST_PER_DAY: "free_request_per_day",
 };
+
+export const chatSuggestions = [
+  "Is it orderable?",
+  "What are the specifications?",
+  "When does support end?",
+];
+export const initialSuggestions = [
+  "C2960X-48FPS-L",
+  "Catalyst 9200 series",
+  "Nexus 9500",
+];

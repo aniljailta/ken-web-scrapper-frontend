@@ -9,7 +9,7 @@ import { InputComponent } from "../../components/InputComponent";
 import Link from "next/link";
 import httpService from "@/utils/httpService";
 import { PencilSvg } from "@/svg";
-import { ROLE_TYPE } from "@/utils/constant";
+import { chatSuggestions, ROLE_TYPE } from "@/utils/constant";
 import SuggestionList from "@/app/components/SuggestionList";
 import { MessageList } from "@/app/components/Chat/MessageList";
 import { StreamingChat } from "@/app/components/Chat/StreamChat";
@@ -196,6 +196,7 @@ export default function SearchPage() {
               {/* Fixed input box at the bottom */}
               <div className="mt-4 sticky bottom-0 bg-white w-full p-4 space-y-3">
                 <SuggestionList
+                  suggestionList={chatSuggestions}
                   onSelect={(question) => onSubmit(question, () => { })}
                 />
                 {messageLoading ? (
@@ -214,6 +215,11 @@ export default function SearchPage() {
             </div>
           )
         )}
+      </div>
+      <div className="w-full items-center justify-center flex p-4 pb-0 bg-white ">
+        <p className="text-black text-xs font-light">
+          Everybody makes mistakes. Check important info.
+        </p>
       </div>
     </div>
   );

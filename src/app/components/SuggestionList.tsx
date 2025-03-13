@@ -2,15 +2,11 @@ import React, { useState } from "react";
 
 interface SuggestionListProps {
   onSelect: (question: string) => void;
+  suggestionList: string[];
 }
 
-const suggestionList = [
-  "Is it orderable?",
-  "What are the specifications?",
-  "When does support end?",
-];
 
-const SuggestionList: React.FC<SuggestionListProps> = ({ onSelect }) => {
+const SuggestionList: React.FC<SuggestionListProps> = ({ onSelect, suggestionList }) => {
   const [suggestions, setSuggestions] = useState(suggestionList);
 
   // Function to remove a suggestion after it's clicked
