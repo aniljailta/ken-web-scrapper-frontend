@@ -8,28 +8,22 @@ import { InputComponent } from "../../components/InputComponent";
 
 import Link from "next/link";
 import httpService from "@/utils/httpService";
-import { LoadingSvg, PencilSvg } from "@/svg";
+import { PencilSvg } from "@/svg";
 import { ROLE_TYPE } from "@/utils/constant";
 import SuggestionList from "@/app/components/SuggestionList";
 import { MessageList } from "@/app/components/Chat/MessageList";
+import { StreamingChat } from "@/app/components/Chat/StreamChat";
 
 export default function SearchPage() {
   const { data: sessionUser } = useSession();
 
-  const [isTyping, setIsTyping] = useState<boolean>(false);
+  const [chatProgressing, setChatProgressing] = useState<boolean>(false);
   const { conversationState, setConversationState } = useConversation();
   const { messages, conversationId, messageLoading, isLoadingRequest } =
     conversationState;
 
   const messageContainerRef = useRef<HTMLDivElement>(null);
-  const typingIndicatorRef = useRef<HTMLDivElement>(null);
 
-  // const { scrollToLastMessage } = useScrollMessages({
-  //   messageContainerRef: messageContainerRef as RefObject<HTMLDivElement>,
-  //   typingIndicatorRef: typingIndicatorRef as RefObject<HTMLDivElement>,
-  //   messages,
-  //   isTyping,
-  // });
 
   const onSubmit = async (productQuestion: string, reset: () => void) => {
     if (!productQuestion || isLoadingRequest) return;
@@ -49,10 +43,8 @@ export default function SearchPage() {
         isLoadingRequest: true,
       }));
 
-      // Scroll after adding user message
-      // scrollToLastMessage();
 
-      setIsTyping(true);
+      setChatProgressing(true);
 
       const res = await httpService.post(
         "conversation/thread",
@@ -66,14 +58,16 @@ export default function SearchPage() {
       );
 
       const responseData = await res.data;
-      setIsTyping(false);
+      setChatProgressing(false);
       reset(); // Reset form after submission
 
+
+
       if (responseData.data) {
-        simulateTypingEffect(responseData.data, responseData?.messageId);
         setConversationState((prev) => ({
           ...prev,
           conversationId: responseData?.conversationId,
+          messages: [...prev.messages, { role: ROLE_TYPE.ASSISTANT, content: responseData.data, isFlag: false }],
         }));
       } else {
         setConversationState((prev) => ({
@@ -113,40 +107,6 @@ export default function SearchPage() {
     }
   };
 
-  // Simulate Typing Effect
-  const simulateTypingEffect = (response: string, messageId?: string) => {
-    let index = 0;
-
-    setConversationState((prev) => ({
-      ...prev,
-      messages: [
-        ...prev.messages,
-        { role: ROLE_TYPE.ASSISTANT, content: "", reactionStatus: null, isFlag: false },
-      ],
-    }));
-
-    const typingInterval = setInterval(() => {
-      setConversationState((prev) => ({
-        ...prev,
-        messages: prev.messages.map((msg, i) =>
-          i === prev.messages.length - 1 && msg.role === ROLE_TYPE.ASSISTANT
-            ? {
-              ...msg,
-              content: msg.content + response[index - 1],
-              ...(messageId && { id: messageId }),
-            }
-            : msg
-        ),
-      }));
-
-
-      index++;
-
-      if (index >= response.length) {
-        clearInterval(typingInterval);
-      }
-    }, 20);
-  };
 
 
   const handleReaction = async ({
@@ -225,16 +185,10 @@ export default function SearchPage() {
                 className="flex-1 overflow-y-auto space-y-4 max-w-3xl p-4"
               >
                 <MessageList handleReaction={handleReaction} data={messages} />
-
-                {isTyping && (
-                  <div
-                    ref={typingIndicatorRef}
-                    className="p-4 bg-gray-100 text-gray-900 mr-auto rounded-lg flex items-center gap-2"
-                  >
-                    <span className="animate-pulse">Retrieving PID</span>
-                    <LoadingSvg />
-                  </div>
-                )}
+                {
+                  chatProgressing &&
+                  <StreamingChat />
+                }
                 {/* Spacer div to maintain gap */}
                 <div className="h-20 w-full"></div>
               </div>

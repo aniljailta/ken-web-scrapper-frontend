@@ -6,6 +6,7 @@ import { Roboto_Mono } from "next/font/google";
 import HeaderLayout from "./components/HeaderLayout";
 import { ConversationProvider } from "@/providers/ConversationProvider";
 import { Toaster } from "sonner";
+import { SocketProvider } from "@/providers/SocketProvider";
 
 const robotoMono = Roboto_Mono({
   subsets: ["latin"],
@@ -22,10 +23,12 @@ export default function RootLayout({
     <html lang="en" suppressHydrationWarning className={robotoMono.className}>
       <body>
         <AuthProvider>
-          <ConversationProvider>
-            <Toaster position="top-right" />
-            <HeaderLayout>{children}</HeaderLayout>
-          </ConversationProvider>
+          <SocketProvider>
+            <ConversationProvider>
+              <Toaster position="top-right" />
+              <HeaderLayout>{children}</HeaderLayout>
+            </ConversationProvider>
+          </SocketProvider>
         </AuthProvider>
       </body>
     </html>

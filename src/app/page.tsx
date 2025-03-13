@@ -7,14 +7,14 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { InputComponent } from "./components/InputComponent";
 import httpService from "@/utils/httpService";
-import { LoadingSvg } from "@/svg";
 import { ROLE_TYPE } from "@/utils/constant";
 import { MessageList } from "./components/Chat/MessageList";
+import { StreamingChat } from "./components/Chat/StreamChat";
 
 export default function Home() {
   const { data: sessionUser } = useSession();
   const router = useRouter();
-  const [isTyping, setIsTyping] = useState<boolean>(false);
+  const [chatProgressing, setChatProgressing] = useState<boolean>(false);
   const { conversationState, setConversationState } = useConversation();
   const { messages, isLoadingRequest } = conversationState;
 
@@ -31,7 +31,7 @@ export default function Home() {
         isLoadingRequest: true,
       }));
 
-      setIsTyping(true);
+      setChatProgressing(true);
 
       const res = await httpService.post(
         "conversation/chat",
@@ -46,23 +46,27 @@ export default function Home() {
 
       const responseData = await res.data;
 
-      setIsTyping(false);
+      setChatProgressing(false);
       reset(); // Reset form after submission
 
       if (responseData.data) {
-        // Simulate the typing effect
-        simulateTypingEffect(responseData.data, () => {
-          if (responseData?.conversationId) {
-            // Perform the redirect only after the typing effect finishes
-            router.push(`/search/${responseData?.conversationId}`);
-          }
+        if (responseData?.conversationId) {
+          // Perform the redirect only after the typing effect finishes
+          router.push(`/search/${responseData?.conversationId}`);
+        }
+        setConversationState((prev) => ({
+          ...prev,
+          messages: [...prev.messages, { role: ROLE_TYPE.ASSISTANT, content: "", isFlag: false }],
+        }));
+        setConversationState((prev) => ({
+          ...prev,
+          messages: prev.messages.map((msg, i) =>
+            i === prev.messages.length - 1 && msg.role === ROLE_TYPE.ASSISTANT
+              ? { ...msg, content: responseData.data }
+              : msg
+          ),
+        }));
 
-          // Set the conversationId after redirect
-          setConversationState((prev) => ({
-            ...prev,
-            conversationId: responseData?.conversationId || "",
-          }));
-        });
       } else {
         setConversationState((prev) => ({
           ...prev,
@@ -93,37 +97,6 @@ export default function Home() {
     }
   };
 
-  // Simulate Typing Effect with callback after finishing
-  const simulateTypingEffect = (response: string, callback: () => void) => {
-    let index = 0;
-
-    // Add an empty message for the typing effect
-    setConversationState((prev) => ({
-      ...prev,
-      messages: [...prev.messages, { role: ROLE_TYPE.ASSISTANT, content: "", isFlag: false }],
-    }));
-
-    const typingInterval = setInterval(() => {
-      setConversationState((prev) => ({
-        ...prev,
-        messages: prev.messages.map((msg, i) =>
-          i === prev.messages.length - 1 && msg.role === ROLE_TYPE.ASSISTANT
-            ? { ...msg, content: msg.content + response[index - 1] }
-            : msg
-        ),
-      }));
-
-      index++;
-
-      // Clear the interval when the typing effect is complete
-      if (index >= response.length) {
-        clearInterval(typingInterval);
-
-        // Call the callback after the typing effect is done
-        if (callback) callback();
-      }
-    }, 20);
-  };
 
   return (
     <div className="flex min-h-[78vh] flex-col items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
@@ -142,12 +115,10 @@ export default function Home() {
           <div className="flex flex-col h-full">
             <div className="flex-1 space-y-4 max-w-3xl">
               <MessageList data={messages} />
-              {isTyping && (
-                <div className="p-4 bg-gray-100 text-gray-900 mr-auto rounded-lg flex items-center gap-2">
-                  <span className="animate-pulse">Retrieving PID</span>
-                  <LoadingSvg />
-                </div>
-              )}
+              {
+                chatProgressing &&
+                <StreamingChat />
+              }
             </div>
             <div className="mt-4">
               <InputComponent onSubmit={onSubmit} />
