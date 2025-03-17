@@ -9,6 +9,7 @@ import { MessageList } from '../Chat/MessageList';
 import { StreamingChat } from '../Chat/StreamChat';
 import { InputComponent } from '../InputComponent';
 import SuggestionList from '../SuggestionList';
+import { generateUrlParam, getGuestToken } from '@/utils/helper';
 
 export const Chat = () => {
 
@@ -33,8 +34,15 @@ export const Chat = () => {
 
             setChatProgressing(true);
 
+            const guestToken = getGuestToken()
+            let token = null;
+
+            if (guestToken && !sessionUser?.user) {
+                token = generateUrlParam('token', guestToken);
+            }
+
             const res = await httpService.post(
-                "conversation/chat",
+                `conversation/chat?${token ? token : ''}`,
                 { question: productQuestion },
                 {
                     headers: {
@@ -52,6 +60,10 @@ export const Chat = () => {
             if (responseData.data) {
                 if (responseData?.conversationId) {
                     // Perform the redirect only after the typing effect finishes
+                    setConversationState((prev) => ({
+                        ...prev,
+                        conversationId: responseData.conversationId
+                    }));
                     router.push(`/search/${responseData?.conversationId}`);
                 }
                 setConversationState((prev) => ({

@@ -13,6 +13,7 @@ import { chatSuggestions, ROLE_TYPE } from "@/utils/constant";
 import SuggestionList from "@/app/components/SuggestionList";
 import { MessageList } from "@/app/components/Chat/MessageList";
 import { StreamingChat } from "@/app/components/Chat/StreamChat";
+import { generateUrlParam, getGuestToken } from "@/utils/helper";
 
 export default function SearchPage() {
   const { data: sessionUser } = useSession();
@@ -46,8 +47,15 @@ export default function SearchPage() {
 
       setChatProgressing(true);
 
+      const guestToken = getGuestToken()
+      let token = null;
+
+      if (guestToken && !sessionUser?.user) {
+        token = generateUrlParam('token', guestToken);
+      }
+
       const res = await httpService.post(
-        "conversation/thread",
+        `conversation/thread?${token ? token : ''}`,
         { question: productQuestion, conversationId },
         {
           headers: {

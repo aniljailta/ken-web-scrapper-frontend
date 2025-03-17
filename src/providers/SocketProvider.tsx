@@ -1,5 +1,6 @@
 "use client";
 
+import { generateUniqueId, getGuestToken, setGuestToken } from "@/utils/helper";
 import { useSession } from "next-auth/react";
 import { createContext, useContext, useEffect, useState, ReactNode } from "react";
 import { io, Socket } from "socket.io-client";
@@ -18,10 +19,19 @@ export const SocketProvider = ({ children }: { children: ReactNode }) => {
 
     useEffect(() => {
         if (status !== 'loading') {
+
+            let userID = data?.user?.id ?? getGuestToken();
+
+            if (!userID) {
+                userID = generateUniqueId();
+                setGuestToken(userID);
+            }
+
+
             const socketInstance = io(SOCKET_URL, {
                 path: "/socket",
                 query: {
-                    userID: data?.user?.id || null
+                    userID
                 },
                 transports: ['websocket'],
 

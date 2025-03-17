@@ -25,3 +25,27 @@ export function generatePassword(length = 12) {
 export function copyToClipboard(text: string) {
   return navigator.clipboard.writeText(text);
 }
+
+export function generateUniqueId() {
+  return `id-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+}
+
+export function generateUrlParam(key: string, value: string) {
+  const params = new URLSearchParams();
+  params.append(key, value);
+  return params.toString();
+}
+
+const guestTokenKey = "guest_token";
+
+export function getGuestToken() {
+  return window.localStorage.getItem(guestTokenKey);
+}
+
+export function setGuestToken(value: string) {
+  return window.localStorage.setItem(guestTokenKey, value);
+}
+
+export function clearGuestToken() {
+  return window.localStorage.removeItem(guestTokenKey);
+}
