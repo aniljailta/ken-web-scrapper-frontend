@@ -50,3 +50,14 @@ export const initialSuggestions = [
   "Catalyst 9200 series",
   "Nexus 9500",
 ];
+
+export const sortByOptions = [
+  { value: "asc", label: "ASC" },
+  { value: "desc", label: "DESC" },
+] as const;
+
+export const orderByOptions = [
+  { value: "created_date", label: "Date" },
+  { value: "query", label: "Queries" },
+  { value: "tokensUsed", label: "Tokens" },
+] as const;

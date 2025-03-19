@@ -1,3 +1,5 @@
+import { orderByOptions, sortByOptions } from "@/utils/constant";
+
 export interface Conversation {
   id: string;
   userId?: string | null;
@@ -58,3 +60,11 @@ export interface FlaggedData {
   reactionStatus: null;
   conversation: Conversation;
 }
+
+export type SortByType = (typeof sortByOptions)[number]["value"];
+export type OrderByType = (typeof orderByOptions)[number]["value"];
+
+export type FiltersType = {
+  sortBy: SortByType | null;
+  orderBy: OrderByType | null;
+};

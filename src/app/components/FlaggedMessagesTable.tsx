@@ -1,3 +1,4 @@
+'use client'
 import httpService from '@/utils/httpService';
 import DashboardTable from './DashboardTable';
 import { getFlaggedMessagesColumnValue } from '@/utils/tableComponents';

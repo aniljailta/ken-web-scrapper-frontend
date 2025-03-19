@@ -19,7 +19,7 @@ export type ConversationState = {
 export const BetaInviteDrawer = ({ setOpen, open, onFinish }: {
     open: boolean,
     setOpen: React.Dispatch<React.SetStateAction<boolean>>,
-    onFinish: (data: unknown) => void,
+    onFinish: () => void,
 }) => {
     const { data: session } = useSession();
     const [isLoading, setIsLoading] = useState<boolean>(false);
@@ -51,12 +51,12 @@ export const BetaInviteDrawer = ({ setOpen, open, onFinish }: {
         }
         try {
             setIsLoading(true);
-            const response = await httpService.post("users/invite-beta-user", inviteForm, {
+            await httpService.post("users/invite-beta-user", inviteForm, {
                 headers: {
                     Authorization: `Bearer ${session ? session?.user?.access_token : ""}`,
                 },
             });
-            onFinish(response);
+            onFinish();
             handleClose();
             toast.success("New Beta User Created");
         } catch (err) {

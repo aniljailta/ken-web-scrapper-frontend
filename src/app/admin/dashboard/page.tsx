@@ -6,13 +6,14 @@ import { useRouter } from "next/navigation";
 import httpService from "@/utils/httpService";
 
 import DashboardTable from "@/app/components/DashboardTable";
-import { AdminReportData } from "@/app/types";
+import { AdminReportData, FiltersType } from "@/app/types";
 import {
   getConversationTableColumnValue,
   getUserTableColumnValue,
 } from "@/utils/tableComponents";
 import { FlaggedMessagesTable } from "@/app/components/FlaggedMessagesTable";
 import { ReportIcon } from "@/svg/Report";
+import { TableFilters } from "@/app/components/TableFilters";
 
 const initialAdminReport = {
   totalChat: 0,
@@ -30,6 +31,7 @@ function AdminDashboardPage() {
     useState<AdminReportData>(initialAdminReport);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [error, setError] = useState<string>("");
+  const [filters, setFilters] = useState<FiltersType>({ sortBy: null, orderBy: null })
 
   useEffect(() => {
     // Redirect if user is not admin
@@ -38,9 +40,22 @@ function AdminDashboardPage() {
     }
   }, [session, status, router]);
 
-  const fetchAdminReports = async () => {
+  const fetchAdminReports = async (filters?: FiltersType) => {
     try {
-      const response = await httpService.get("users/admin-reports", {
+
+      let queryParams = '';
+      const urlParam = new URLSearchParams()
+      if (filters?.orderBy) {
+
+        urlParam.append('orderBy', filters.orderBy);
+      }
+      if (filters?.sortBy) {
+
+        urlParam.append('sortBy', filters.sortBy);
+      }
+      queryParams = urlParam.toString();
+
+      const response = await httpService.get(`users/admin-reports?${queryParams ? queryParams : ''}`, {
         headers: {
           Authorization: `Bearer ${session ? session?.user?.access_token : ""}`,
         },
@@ -62,6 +77,13 @@ function AdminDashboardPage() {
       fetchAdminReports();
     }
   }, [session]);
+
+  useEffect(() => {
+    if (session?.user?.role === "admin") {
+      fetchAdminReports(filters);
+    }
+
+  }, [filters])
 
   // Show loading state
   if (status === "loading" || isLoading) {
@@ -140,6 +162,7 @@ function AdminDashboardPage() {
             </div>
           </div>
           <div className="my-4 lg:my-8">
+            <TableFilters filters={filters} setFilters={setFilters} onChange={(values) => { setFilters(values) }} />
             <DashboardTable
               data={adminReportsData.userList}
               headers={userHeaders}
