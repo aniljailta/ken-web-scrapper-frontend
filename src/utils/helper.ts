@@ -9,9 +9,8 @@ export function generatePassword(length = 12) {
   const upperCase = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
   const lowerCase = "abcdefghijklmnopqrstuvwxyz";
   const numbers = "0123456789";
-  const symbols = "!@#$%^&*()_+[]{}|;:,.<>?";
 
-  const allCharacters = upperCase + lowerCase + numbers + symbols;
+  const allCharacters = upperCase + lowerCase + numbers;
   let password = "";
 
   for (let i = 0; i < length; i++) {

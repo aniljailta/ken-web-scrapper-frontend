@@ -28,6 +28,15 @@ export default function LoginPage() {
             </Link>
           </p>
         </div>
+        <div>
+          <p className="text-sm text-center font-light">
+            Have Beta Credentials?{" "}
+            <Link passHref href="/reset-password">
+              {" "}
+              <span className="cursor-pointer text-indigo-700/75">Reset your Password instead</span>
+            </Link>
+          </p>
+        </div>
       </div>
     </div>
   );
