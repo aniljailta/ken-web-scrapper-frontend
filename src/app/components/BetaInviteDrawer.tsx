@@ -4,7 +4,6 @@ import { Drawer } from 'vaul';
 import Image from "next/image";
 import { useSession } from 'next-auth/react';
 import { useState } from 'react';
-import { generatePassword } from '@/utils/helper';
 import httpService from '@/utils/httpService';
 import { toast } from 'sonner';
 
@@ -25,15 +24,15 @@ export const BetaInviteDrawer = ({ setOpen, open, onFinish }: {
     const [isLoading, setIsLoading] = useState<boolean>(false);
     const [error, setError] = useState<string>("");
     const [inviteForm, setInviteForm] = useState({
-        email: '',
-        password: ''
+        firstName: '',
+        email: ''
     });
 
     const handleClose = () => {
         setOpen(false);
         setInviteForm({
-            email: '',
-            password: ''
+            firstName: '',
+            email: ''
         });
     }
 
@@ -109,6 +108,17 @@ export const BetaInviteDrawer = ({ setOpen, open, onFinish }: {
                                         >
                                             <div>
                                                 <input
+                                                    placeholder="First Name"
+                                                    type="text"
+                                                    required
+                                                    disabled={isLoading}
+                                                    value={inviteForm.firstName}
+                                                    onChange={(e) => setInviteForm((prev) => ({ ...prev, firstName: e.target.value }))}
+                                                    className="disabled:cursor-not-allowed mt-1 block w-full max-w-[360px] h-[45px] rounded-[10px] border border-neutral-400 px-4 py-3"
+                                                />
+                                            </div>
+                                            <div>
+                                                <input
                                                     placeholder="Invite User Email"
                                                     type="email"
                                                     required
@@ -118,30 +128,14 @@ export const BetaInviteDrawer = ({ setOpen, open, onFinish }: {
                                                     className="disabled:cursor-not-allowed mt-1 block w-full max-w-[360px] h-[45px] rounded-[10px] border border-neutral-400 px-4 py-3"
                                                 />
                                             </div>
-                                            <div>
-                                                <input
-                                                    placeholder="Password"
-                                                    type="text"
-                                                    required
-                                                    disabled={isLoading}
-                                                    value={inviteForm.password}
-                                                    onChange={(e) => setInviteForm((prev) => ({ ...prev, password: e.target.value }))}
-                                                    className=" disabled:cursor-not-allowed mt-1 block w-full max-w-[360px] h-[45px] rounded-[10px] border border-neutral-400 px-4 py-3"
-                                                />
-                                                <span onClick={() => {
-                                                    const newPassword = generatePassword(15);
-                                                    setInviteForm((prev) => ({ ...prev, password: newPassword }));
-
-                                                }} className='mt-1 block hover:text-slate-500 cursor-pointer'>Generate Password</span>
-                                            </div>
                                             {error && <p className="text-red-500 text-sm">{error}</p>}
                                             <button
                                                 type="submit"
-                                                disabled={!inviteForm.email || !inviteForm.password || isLoading}
+                                                disabled={!inviteForm.email || !inviteForm.firstName || isLoading}
                                                 onClick={handleSubmit}
                                                 className="disabled:cursor-not-allowed w-full max-w-[360px] h-[45px] bg-neutral-300 text-white px-4 py-3 rounded-[10px] hover:bg-black cursor-pointer"
                                             >
-                                                Create User
+                                                Create Invite Link
                                             </button>
                                         </form>
                                         {/* Spacer div to maintain gap */}

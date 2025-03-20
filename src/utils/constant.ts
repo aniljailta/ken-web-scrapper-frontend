@@ -61,3 +61,5 @@ export const orderByOptions = [
   { value: "query", label: "Queries" },
   { value: "tokensUsed", label: "Tokens" },
 ] as const;
+
+export const baseInviteLink = "https://greatmigration.io/set-beta-password";

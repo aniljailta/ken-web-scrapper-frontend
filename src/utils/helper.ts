@@ -1,3 +1,5 @@
+import { baseInviteLink } from "./constant";
+
 export const getInitials = (name: string) => {
   if (!name) return "GU";
   const nameParts = name.trim().split(" ");
@@ -23,6 +25,19 @@ export function generatePassword(length = 12) {
 
 export function copyToClipboard(text: string) {
   return navigator.clipboard.writeText(text);
+}
+
+export function generateInviteLink(email: string) {
+  const appURL = baseInviteLink;
+  if (!appURL) {
+    return Promise.reject("No App URL Found");
+  }
+  const params = new URLSearchParams();
+  params.append("beta-email", email);
+
+  const inviteUrl = appURL + "?" + params.toString();
+
+  return copyToClipboard(inviteUrl);
 }
 
 export function generateUniqueId() {

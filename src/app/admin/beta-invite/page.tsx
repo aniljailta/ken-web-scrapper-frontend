@@ -13,6 +13,7 @@ const headers = [
     'Name',
     'Email',
     'Created At',
+    'Status',
     'Action'
 ];
 

@@ -201,7 +201,7 @@ function SideDrawer({
                         className="text-sm text-black cursor-pointer"
                         onClick={handleClickBetaInvite}
                       >
-                        Beta Invite
+                        Invite
                       </div>
                     </div>
                     <div className="flex justify-end items-center gap-2">

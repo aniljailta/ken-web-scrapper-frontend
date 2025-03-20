@@ -25,6 +25,7 @@ export interface User {
   email: string;
   name: string;
   role: string;
+  password: string;
   created_date: string;
   tokensUsed: number;
   conversations: Conversation[];
