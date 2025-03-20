@@ -112,9 +112,18 @@ export const Chat = () => {
         <div className="w-full h-full max-w-xl space-y-8">
             {messages.length === 0 && (
                 <div className="space-y-9">
-                    <h1 className="text-center text-3xl text-[32px] font-medium tracking-tight text-gray-900">
-                        What can I help you find?
-                    </h1>
+                    <div className='space-y-5'>
+                        {
+                            sessionUser &&
+                            <h2 className='text-left text-[24px] font-light tracking-[0.25px] text-gray-900'>
+                                Hello, {sessionUser?.user.name}
+                            </h2>
+
+                        }
+                        <h1 className="text-left text-3xl text-[32px] font-medium tracking-tight text-gray-900">
+                            What can I help you find?
+                        </h1>
+                    </div>
                     <SuggestionList
                         suggestionList={initialSuggestions}
                         onSelect={(question) => onSubmit(question, () => { })}
