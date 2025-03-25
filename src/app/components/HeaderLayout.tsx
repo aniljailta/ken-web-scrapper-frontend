@@ -23,9 +23,8 @@ export default function HeaderLayout({
     try {
       const response = await httpService.get("conversation/all-chat", {
         headers: {
-          Authorization: `Bearer ${
-            session && session.user ? session.user.access_token : ""
-          }`,
+          Authorization: `Bearer ${session && session.user ? session.user.access_token : ""
+            }`,
         },
       });
       const data = await response.data;
@@ -78,11 +77,11 @@ export default function HeaderLayout({
               />
             ) : (
               <div className="flex justify-between gap-2">
-                <Link href={"/signup"} passHref>
+                {/* <Link href={"/signup"} passHref>
                   <div className="min-w-24 px-4 py-3 bg-black text-white rounded-[10px]">
                     Sign Up
                   </div>
-                </Link>
+                </Link> */}
                 <Link href={"/login"} passHref>
                   <div className="min-w-24 px-4 py-3 bg-white text-black rounded-[10px]">
                     Log in
@@ -95,13 +94,13 @@ export default function HeaderLayout({
           {/* Mobile View */}
           <div className="flex md:hidden items-center justify-between">
             {/* Sign Up (Only if not logged in) */}
-            {!session?.user && (
+            {/* {!session?.user && (
               <Link href={"/signup"} passHref>
                 <div className="px-4 py-2 bg-black text-white rounded-[10px] text-sm">
                   Sign Up
                 </div>
               </Link>
-            )}
+            )} */}
 
             {/* Centered Site Name */}
             <Link

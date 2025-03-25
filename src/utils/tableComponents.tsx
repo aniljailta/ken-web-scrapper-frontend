@@ -4,7 +4,7 @@ import { Conversation, FlaggedData, ProductData, User } from "@/app/types";
 import { Session } from "next-auth";
 import Link from "next/link";
 import RemoveBetaUser from "@/app/components/RemoveBetaUser";
-import { generateInviteLink } from "./helper";
+import { copyToClipboard, generateInviteLink } from "./helper";
 import { toast } from "sonner";
 
 export const formatDate = (dateString: string) => {
@@ -101,13 +101,18 @@ export const getInviteColumnValue = ({
       return formatDate(data.created_date);
     default:
       return <div className="flex items-center justify-center gap-2">
-        <button onClick={() => {
-          generateInviteLink(data.email).then(() => {
-            toast.success('Invite Link Copied to Clipboard')
-          }).catch((error) => {
-            toast.error(error instanceof Error ? error.message : 'Something Went wrong while Copying invite link')
-          });
+        <button onClick={async () => {
+          const content = await generateInviteLink(data.email);
 
+          if (content) {
+
+            copyToClipboard(content)
+              .then(() => {
+                toast.success('Invite Link Copied to Clipboard')
+              }).catch((error) => {
+                toast.error(error instanceof Error ? error.message : 'Something Went wrong while Copying invite link')
+              });
+          }
         }} className=" bg-neutral-300 text-white p-2  rounded-[10px] hover:bg-black cursor-pointer">
           Copy Invite Link
         </button>

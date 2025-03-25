@@ -35,9 +35,7 @@ export function generateInviteLink(email: string) {
   const params = new URLSearchParams();
   params.append("beta-email", email);
 
-  const inviteUrl = appURL + "?" + params.toString();
-
-  return copyToClipboard(inviteUrl);
+  return appURL + "?" + params.toString();
 }
 
 export function generateUniqueId() {

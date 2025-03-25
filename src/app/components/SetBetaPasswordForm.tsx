@@ -91,7 +91,7 @@ export default function SetBetaPasswordForm() {
   return (
     <form
       onSubmit={handleSubmit}
-      className="space-y-4 w-full max-w-[360px] mx-auto"
+      className="space-y-8 w-full max-w-[360px] mx-auto"
     >
       <div>
         <input

@@ -15,15 +15,18 @@ const SetBetaPassword = () => {
                     </div>
                 </Link>
                 <div>
-                    <h2 className="text-center text-2xl font-medium tracking-tight text-gray-900">
-                        Welcome! Let&apos;s setup your Password!
+                    <h2 className="text-left text-2xl font-medium tracking-tight text-gray-900">
+                        <span className='block'>
+                            Welcome!
+                        </span>
+                        Let&apos;s setup your Password!
                     </h2>
                 </div>
                 <Suspense fallback={<LoadingSvg />}>
                     <SetBetaPasswordForm />
                 </Suspense>
             </div>
-        </div>
+        </div >
     )
 }
 
