@@ -4,7 +4,7 @@ import BetaJoinForm from './BetaJoinForm'
 export const BetaJoin = () => {
     return (
         <div className='space-y-7 py-4'>
-            <div className='space-y-6'>
+            <div className='space-y-4'>
                 <h2 className='font-medium text-[32px] tracking-[0.25px] leading-12'>
                     Find hardware replacements
                     <br />
