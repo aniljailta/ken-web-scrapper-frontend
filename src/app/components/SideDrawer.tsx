@@ -192,7 +192,7 @@ function SideDrawer({
                   ))}
                 </div>
               </div>
-              <div className="flex flex-col gap-4 sticky bottom-0 right-0">
+              <div className="flex flex-col gap-4 sticky bottom-2 right-0">
                 {session.user.role === "admin" && (
                   <>
 
