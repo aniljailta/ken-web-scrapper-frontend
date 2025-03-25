@@ -129,7 +129,7 @@ function SideDrawer({
         <Drawer.Portal>
           <Drawer.Overlay className="fixed inset-0 bg-black/40" />
           <Drawer.Content className="-right-0.5 top-0.5 bottom-2 fixed z-10 outline-none w-80 h-screen flex rounded-lg bg-zinc-50 border border-gray-400">
-            <div className="p-3 xl:p-5 space-y-4 w-full flex-1 flex flex-col justify-between gap-4">
+            <div className="p-3 xl:p-5 space-y-4 w-full flex-1 flex flex-col justify-between gap-4 relative">
               <div className="space-y-4">
                 <div className="flex justify-between items-center gap-2">
                   <div className="flex justify-start items-end gap-4">
@@ -192,7 +192,7 @@ function SideDrawer({
                   ))}
                 </div>
               </div>
-              <div className="flex flex-col gap-4">
+              <div className="flex flex-col gap-4 sticky bottom-0 right-0">
                 {session.user.role === "admin" && (
                   <>
 
