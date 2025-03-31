@@ -1,6 +1,7 @@
 "use client";
 import "./globals.css";
 import { AuthProvider } from "./providers";
+import { GoogleTagManager } from '@next/third-parties/google'
 
 import { Roboto_Mono } from "next/font/google";
 import HeaderLayout from "./components/HeaderLayout";
@@ -21,6 +22,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" suppressHydrationWarning className={robotoMono.className}>
+      <GoogleTagManager gtmId="G-TD6ZS2ESY7" />
       <body>
         <AuthProvider>
           <SocketProvider>
