@@ -119,6 +119,17 @@ function SideDrawer({
     router.push("/admin/beta-invite");
   };
 
+  const handleClickScrapingLog = () => {
+    setOpen(false);
+    setConversationState({
+      messages: [],
+      conversationId: "",
+      messageLoading: false,
+      isLoadingRequest: false,
+    });
+    router.push("/admin/scraping-logs");
+  };
+
   return (
     <Drawer.Root direction="right" open={open} onOpenChange={setOpen}>
       <div className="relative">
@@ -213,6 +224,14 @@ function SideDrawer({
                         Dashboard
                       </div>
                     </div>{" "}
+                    <div className="flex justify-end items-center gap-2">
+                      <div
+                        className="text-sm text-black cursor-pointer"
+                        onClick={handleClickScrapingLog}
+                      >
+                        Scrapping Logs
+                      </div>
+                    </div>
                     <div className="flex justify-end items-center gap-2">
                       <div
                         className="text-sm text-black cursor-pointer"

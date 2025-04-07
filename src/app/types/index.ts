@@ -61,6 +61,12 @@ export interface FlaggedData {
   reactionStatus: null;
   conversation: Conversation;
 }
+export interface ScrapingLog {
+  id: number;
+  productName: string;
+  error: string;
+  createdAt: string;
+}
 
 export type SortByType = (typeof sortByOptions)[number]["value"];
 export type OrderByType = (typeof orderByOptions)[number]["value"];
