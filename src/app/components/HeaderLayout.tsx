@@ -5,7 +5,7 @@ import { useEffect, useState } from "react";
 import { Conversation } from "../types";
 import httpService from "@/utils/httpService";
 import SideDrawer from "./SideDrawer";
-import { getInitials } from "@/utils/helper";
+import { clearGuestToken, getInitials } from "@/utils/helper";
 import { useConversation } from "@/providers/ConversationProvider";
 
 export default function HeaderLayout({
@@ -42,6 +42,7 @@ export default function HeaderLayout({
 
   useEffect(() => {
     if (session && session.user) {
+      clearGuestToken();
       fetchChatList();
     }
   }, [session]);
